@@ -224,5 +224,38 @@ class General extends Model
 
     }
 
+    public function formatoDecimal($valor){
+        try {
+            // Verificar si el valor es numérico y mayor que 0
+            if (!is_numeric($valor)) {
+                \Log::error('Valor no numérico:', ['valor' => $valor]);
+                return 0;
+            }
+
+            // Convertir el valor a cadena y eliminar cualquier carácter no numérico (excepto el punto decimal)
+            $valorStr = preg_replace('/[^0-9.]/', '', (string)$valor);
+
+            // Verificar si el valor es mayor que 0
+            if ($valorStr <= 0) {
+                \Log::error('Valor no positivo:', ['valor' => $valorStr]);
+                return 0;
+            }
+
+            // Truncar el número a dos decimales sin redondear usando bcdiv
+            $formattedValue = bcdiv($valorStr, '1', 2);
+
+            // Si el valor truncado no tiene decimales, mostramos sin decimales
+            if ($formattedValue == floor($formattedValue)) {
+                return number_format($formattedValue, 0, '.', ',');
+            }
+
+            // Si tiene decimales, mostramos dos decimales
+            return number_format($formattedValue, 2, '.', ',');
+        } catch (\Exception $e) {
+            // En caso de error, insertamos el log y retornamos 0
+            $this->logs->insertarLog($e);
+            return 0;
+        }
+    }
 
 }
