@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\IntranetController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ComercialController;
 
 
 
@@ -48,5 +49,10 @@ Route::prefix('configuracion')->middleware('auth')->group(function () {
 
 /* ----------------------------- RUTAS FINALES DE CONFIGURACIÓN ---------------------------------*/
 
+
+//COMERCIAL
+Route::prefix('Comercial')->middleware('auth')->group(function () {
+    route::get('/clientes',[ComercialController::class ,'clientes'])->name('Comercial.clientes')->middleware('verifyUserStatus')->middleware('can:clientes');
+});
 
 
