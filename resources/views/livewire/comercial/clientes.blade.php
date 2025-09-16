@@ -21,7 +21,7 @@
                         @error('id_tipo_documento')<span class="message-error">{{ $message }}</span>@enderror
                     </div>
 
-                    <div class="col-12 col-md-12 col-sm-12 mb-3">
+                    <div class="col-6 col-md-6 col-sm-6 mb-3">
                         <label for="cliente_numero_documento" class="form-label">Número de documento (*)</label>
                         <x-input-general type="text" id="cliente_numero_documento" wire:change="consultarDocumento" wire:model="cliente_numero_documento"/>
                         @error('cliente_numero_documento')

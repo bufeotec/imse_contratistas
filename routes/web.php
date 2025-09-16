@@ -5,6 +5,8 @@ use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\IntranetController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ComercialController;
+use App\Http\Controllers\RecursoshumanosController;
+use App\Http\Controllers\DespachosController;
 
 
 
@@ -55,4 +57,12 @@ Route::prefix('Comercial')->middleware('auth')->group(function () {
     route::get('/clientes',[ComercialController::class ,'clientes'])->name('Comercial.clientes')->middleware('verifyUserStatus')->middleware('can:clientes');
 });
 
+//RECURSOS HUMANOS
+Route::prefix('Recursoshumanos')->middleware('auth')->group(function () {
+    route::get('/personales',[RecursoshumanosController::class ,'personales'])->name('Recursoshumanos.personales')->middleware('verifyUserStatus')->middleware('can:personales');
+});
 
+//DESPACHOS
+Route::prefix('Despachos')->middleware('auth')->group(function () {
+    route::get('/gestionar_despachos',[DespachosController::class ,'gestionar_despachos'])->name('Despachos.gestionar_despachos')->middleware('verifyUserStatus')->middleware('can:gestionar_despachos');
+});
