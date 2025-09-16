@@ -12,10 +12,30 @@ class LogisticaController extends Controller{
         $this->logs = new Logs();
     }
 
+    public function transportistas(){
+        try {
+
+            return view('logistica.transportistas');
+        }catch (\Exception $e){
+            $this->logs->insertarLog($e);
+            return redirect()->route('intranet')->with('error', 'Ocurrió un error al intentar mostrar el contenido.');
+        }
+    }
+
     public function vehiculos(){
         try {
 
             return view('logistica.vehiculos');
+        }catch (\Exception $e){
+            $this->logs->insertarLog($e);
+            return redirect()->route('intranet')->with('error', 'Ocurrió un error al intentar mostrar el contenido.');
+        }
+    }
+
+    public function recursos(){
+        try {
+
+            return view('logistica.recursos');
         }catch (\Exception $e){
             $this->logs->insertarLog($e);
             return redirect()->route('intranet')->with('error', 'Ocurrió un error al intentar mostrar el contenido.');

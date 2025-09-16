@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
-class Vehiculo extends Model{
+class Recurso extends Model{
     use HasFactory;
-    protected $table = "vehiculos";
-    protected $primaryKey = "id_vehiculo";
+    protected $table = "recursos";
+    protected $primaryKey = "id_recurso";
     private $logs;
 
     public function __construct(){
@@ -18,14 +18,15 @@ class Vehiculo extends Model{
         $this->logs = new Logs();
     }
 
-    public function listar_vehiculo_activos($search,$pagination,$order = 'asc'){
+    public function listar_recursos_activos($search,$pagination,$order = 'asc'){
         try {
-            $query = DB::table('vehiculos as v')
-                ->join('transportistas as tr', 'v.id_transportista', 'tr.id_transportista')
+            $query = DB::table('recursos as r')
+                ->join('tipos_recursos as tr', 'r.id_tipo_recurso', 'tr.id_tipo_recurso')
+                ->join('medida as m', 'r.id_medida', 'm.id_medida')
                 ->where(function($q) use ($search) {
-                    $q->where('v.vehiculo_placa', 'like', '%' . $search . '%')
-                        ->orWhereNull('v.vehiculo_placa');
-                })->orderBy('v.id_vehiculo', $order);
+                    $q->where('r.recurso_cantidad', 'like', '%' . $search . '%')
+                        ->orWhereNull('r.recurso_cantidad');
+                })->orderBy('r.id_recurso', $order);
 
             $result = $query->paginate($pagination);
             // Numeración de filas

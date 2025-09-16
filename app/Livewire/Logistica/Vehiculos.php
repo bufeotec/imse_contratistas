@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use App\Models\Logs;
 use App\Models\Vehiculo;
+use App\Models\Transportista;
 use Livewire\WithoutUrlPagination;
 use Livewire\WithPagination;
 
@@ -15,13 +16,16 @@ class Vehiculos extends Component{
     use WithPagination, WithoutUrlPagination;
     private $logs;
     private $vehiculo;
+    private $transportista;
     public function __construct(){
         $this->logs = new Logs();
         $this->vehiculo = new Vehiculo();
+        $this->transportista = new Transportista();
     }
     public $search_vehiculo;
     public $pagination_vehiculo = 10;
     public $id_vehiculo = "";
+    public $id_transportista = "";
     public $vehiculo_placa = "";
     public $vehiculo_capacidad_peso = "";
     public $vehiculo_ancho = "";
@@ -33,7 +37,20 @@ class Vehiculos extends Component{
 
     public function render(){
         $listar_vehiculos = $this->vehiculo->listar_vehiculo_activos($this->search_vehiculo, $this->pagination_vehiculo);
-        return view('livewire.logistica.vehiculos', compact('listar_vehiculos'));
+        $listar_transportista = $this->transportista->listar_trasnportistas_activos();
+        return view('livewire.logistica.vehiculos', compact('listar_vehiculos', 'listar_transportista'));
+    }
+
+    public function clear_form(){
+        $this->id_vehiculo = "";
+        $this->id_transportista = "";
+        $this->vehiculo_placa = "";
+        $this->vehiculo_capacidad_peso = "";
+        $this->vehiculo_ancho = "";
+        $this->vehiculo_largo = "";
+        $this->vehiculo_alto = "";
+        $this->vehiculo_capacidad_volumen = "";
+        $this->vehiculo_estado = "";
     }
 
     public function calcularVolumen(){
@@ -44,17 +61,18 @@ class Vehiculos extends Component{
     }
 
     public function edit_data($id) {
-        $vehiculoEdit = Vehiculo::find(base64_decode($id));
+        $Edit = Vehiculo::find(base64_decode($id));
 
-        if ($vehiculoEdit) {
-            $this->vehiculo_placa = $vehiculoEdit->vehiculo_placa;
-            $this->vehiculo_capacidad_peso = $vehiculoEdit->vehiculo_capacidad_peso;
-            $this->vehiculo_ancho = $vehiculoEdit->vehiculo_ancho;
-            $this->vehiculo_largo = $vehiculoEdit->vehiculo_largo;
-            $this->vehiculo_alto = $vehiculoEdit->vehiculo_alto;
-            $this->vehiculo_capacidad_volumen = $vehiculoEdit->vehiculo_capacidad_volumen;
-            $this->vehiculo_estado = $vehiculoEdit->vehiculo_estado;
-            $this->id_vehiculo = $vehiculoEdit->id_vehiculo;
+        if ($Edit) {
+            $this->id_transportista = $Edit->id_transportista;
+            $this->vehiculo_placa = $Edit->vehiculo_placa;
+            $this->vehiculo_capacidad_peso = $Edit->vehiculo_capacidad_peso;
+            $this->vehiculo_ancho = $Edit->vehiculo_ancho;
+            $this->vehiculo_largo = $Edit->vehiculo_largo;
+            $this->vehiculo_alto = $Edit->vehiculo_alto;
+            $this->vehiculo_capacidad_volumen = $Edit->vehiculo_capacidad_volumen;
+            $this->vehiculo_estado = $Edit->vehiculo_estado;
+            $this->id_vehiculo = $Edit->id_vehiculo;
         }
     }
 
@@ -112,13 +130,14 @@ class Vehiculos extends Component{
         } catch (\Exception $e) {
             DB::rollBack();
             $this->logs->insertarLog($e);
-            session()->flash('error', 'Ocurrió un error al guardar el registro. Por favor, inténtelo nuevamente.');
+            session()->flash('error', 'Ocurrió un error. Por favor, inténtelo nuevamente.');
         }
     }
 
     public function save_vehiculo() {
         try {
             $this->validate([
+                'id_transportista' => 'required|integer',
                 'vehiculo_placa' => 'required|string',
                 'vehiculo_capacidad_peso' => 'required|numeric',
                 'vehiculo_ancho' => 'required|numeric',
@@ -128,6 +147,9 @@ class Vehiculos extends Component{
                 'vehiculo_estado' => 'nullable|integer',
                 'id_vehiculo' => 'nullable|integer',
             ], [
+                'id_transportista.required' => 'El transportista es obligatoria.',
+                'id_transportista.integer' => 'El transportista debe tener un valor numérico.',
+
                 'vehiculo_placa.required' => 'La placa es obligatoria.',
                 'vehiculo_placa.string' => 'La placa debe ser una cadena de texto.',
 
@@ -163,6 +185,7 @@ class Vehiculos extends Component{
                     DB::beginTransaction();
                     $vehiculo_save = new Vehiculo();
                     $vehiculo_save->id_users = Auth::id();
+                    $vehiculo_save->id_transportista = $this->id_transportista;
                     $vehiculo_save->vehiculo_placa = $this->vehiculo_placa;
                     $vehiculo_save->vehiculo_capacidad_peso = $this->vehiculo_capacidad_peso;
                     $vehiculo_save->vehiculo_ancho = $this->vehiculo_ancho;
@@ -201,6 +224,7 @@ class Vehiculos extends Component{
                     DB::beginTransaction();
                     // Actualizar los datos del vehículo
                     $vehiculo_update = Vehiculo::findOrFail($this->id_vehiculo);
+                    $vehiculo_update->id_transportista = $this->id_transportista;
                     $vehiculo_update->vehiculo_placa = $this->vehiculo_placa;
                     $vehiculo_update->vehiculo_capacidad_peso = $this->vehiculo_capacidad_peso;
                     $vehiculo_update->vehiculo_ancho = $this->vehiculo_ancho;

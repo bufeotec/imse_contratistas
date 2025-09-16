@@ -18,6 +18,17 @@
                     </div>
 
                     <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
+                        <label for="id_transportista" class="form-label">Transportista (*)</label>
+                        <select class="form-select" name="id_transportista" id="id_transportista" wire:model="id_transportista" >
+                            <option value="">Seleccionar...</option>
+                            @foreach($listar_transportista as $lpv)
+                                <option value="{{$lpv->id_transportista}}">{{$lpv->transportista_razon_social}}</option>
+                            @endforeach
+                        </select>
+                        @error('id_transportista')<span class="message-error">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
                         <label for="vehiculo_placa" class="form-label">Placa (*)</label>
                         <x-input-general  type="text" id="vehiculo_placa" wire:model="vehiculo_placa"/>
                         @error('vehiculo_placa')<span class="message-error">{{ $message }}</span>@enderror
@@ -91,7 +102,7 @@
             <form wire:submit.prevent="disable_vehiculo">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12">
-                        <h2 class="deleteTitle">{{$messageDelete}}</h2>
+                        <h2 class="deleteTitle">{{$message_delete_vehiculo}}</h2>
                     </div>
                     <div class="col-lg-12 col-md-12 col-sm-12">
                         @error('id_vehiculo') <span class="message-error">{{ $message }}</span> @enderror
@@ -154,7 +165,8 @@
                         <x-slot name="thead">
                             <tr>
                                 <th>N°</th>
-                                <th>Place</th>
+                                <th>Transportista</th>
+                                <th>Placa</th>
                                 <th>Capacidad Peso</th>
                                 <th>Ancho</th>
                                 <th>Largo</th>
@@ -170,6 +182,7 @@
                                 @foreach($listar_vehiculos as $lv)
                                     <tr>
                                         <td>{{$conteo}}</td>
+                                        <td>{{$lv->transportista_razon_social ?? '-'}}</td>
                                         <td>{{$lv->vehiculo_placa}}</td>
                                         <td>{{$lv->vehiculo_capacidad_peso}}</td>
                                         <td>{{$lv->vehiculo_ancho}}</td>
@@ -183,9 +196,6 @@
                                         </td>
                                         <td>
                                             <x-btn-accion class=" text-primary"  wire:click="edit_data('{{ base64_encode($lv->id_vehiculo) }}')" data-bs-toggle="modal" data-bs-target="#modal_vehiculo">
-                                                <x-slot name="tooltip">
-                                                    Editar Vehículo
-                                                </x-slot>
                                                 <x-slot name="message">
                                                     <i class="fa-solid fa-pen-to-square"></i>
                                                 </x-slot>
