@@ -226,6 +226,53 @@ class Clientes extends Component{
                     session()->flash('error', 'Ocurrió un error al guardar el cliente.');
                     return;
                 }
+            }else{
+                try {
+                    $existeDoc = DB::table('clientes')
+                        ->where('cliente_numero_documento', $this->cliente_numero_documento)
+                        ->where('id_cliente', '!=', $this->id_cliente)
+                        ->exists();
+
+                    if ($existeDoc) {
+                        session()->flash('error', 'Ya existe un cliente registrado con este documento.');
+                        return;
+                    }
+
+                    DB::beginTransaction();
+
+                    $upd = Cliente::find($this->id_cliente);
+                    if (!$upd) {
+                        DB::rollBack();
+                        session()->flash('error', 'Cliente no encontrado.');
+                        return;
+                    }
+
+                    $upd->id_tipo_documento = $this->id_tipo_documento;
+                    $upd->cliente_numero_documento = $this->cliente_numero_documento;
+                    $upd->cliente_razon_social = $this->cliente_razon_social;
+                    $upd->cliente_nombre_comercial = $this->cliente_nombre_comercial;
+                    $upd->cliente_direccion = $this->cliente_direccion;
+                    $upd->cliente_telefono = $this->cliente_telefono;
+                    $upd->cliente_email = !empty($this->cliente_email) ? $this->cliente_email : null;
+                    $upd->cliente_persona_contacto = !empty($this->cliente_persona_contacto) ? $this->cliente_persona_contacto : null;
+                    $upd->cliente_numero_contacto = !empty($this->cliente_numero_contacto) ? $this->cliente_numero_contacto : null;
+                    $upd->cliente_observacion = !empty($this->cliente_observacion) ? $this->cliente_observacion : null;
+
+                    if ($upd->save()) {
+                        DB::commit();
+                        $this->dispatch('hideModal');
+                        session()->flash('success', 'Registro actualizado correctamente.');
+                    } else {
+                        DB::rollBack();
+                        session()->flash('error', 'Ocurrió un error al actualizar el cliente.');
+                        return;
+                    }
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    $this->logs->insertarLog($e);
+                    session()->flash('error', 'Ocurrió un error al guardar el registro. Por favor, inténtelo nuevamente.');
+                    return;
+                }
             }
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->setErrorBag($e->validator->errors());
@@ -240,29 +287,27 @@ class Clientes extends Component{
     {
         try {
             $id_decoded = base64_decode($id);
-            $c = \App\Models\Cliente::find($id_decoded);
+            $c = Cliente::find($id_decoded);
 
             if (!$c) {
                 session()->flash('error', 'Cliente no encontrado.');
                 return;
             }
 
-            // Habilita edición completa
             $this->mostrar = true;
             $this->messageConsulta = "";
 
-            // Setea datos al formulario
-            $this->id_cliente               = $c->id_cliente;
-            $this->id_tipo_documento        = $c->id_tipo_documento;
+            $this->id_cliente = $c->id_cliente;
+            $this->id_tipo_documento = $c->id_tipo_documento;
             $this->cliente_numero_documento = $c->cliente_numero_documento;
-            $this->cliente_razon_social     = $c->cliente_razon_social;
+            $this->cliente_razon_social = $c->cliente_razon_social;
             $this->cliente_nombre_comercial = $c->cliente_nombre_comercial;
-            $this->cliente_direccion        = $c->cliente_direccion;
-            $this->cliente_telefono         = $c->cliente_telefono;
-            $this->cliente_email            = $c->cliente_email;
+            $this->cliente_direccion = $c->cliente_direccion;
+            $this->cliente_telefono = $c->cliente_telefono;
+            $this->cliente_email = $c->cliente_email;
             $this->cliente_persona_contacto = $c->cliente_persona_contacto;
-            $this->cliente_numero_contacto  = $c->cliente_numero_contacto;
-            $this->cliente_observacion      = $c->cliente_observacion;
+            $this->cliente_numero_contacto = $c->cliente_numero_contacto;
+            $this->cliente_observacion = $c->cliente_observacion;
 
         } catch (\Exception $e) {
             $this->logs->insertarLog($e);

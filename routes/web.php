@@ -7,6 +7,8 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ComercialController;
 use App\Http\Controllers\LogisticaController;
 use App\Http\Controllers\ControldocumentarioController;
+use App\Http\Controllers\RecursoshumanosController;
+use App\Http\Controllers\DespachosController;
 
 
 
@@ -57,6 +59,10 @@ Route::prefix('Comercial')->middleware('auth')->group(function () {
     route::get('/clientes',[ComercialController::class ,'clientes'])->name('Comercial.clientes')->middleware('verifyUserStatus')->middleware('can:clientes');
 });
 
+//RECURSOS HUMANOS
+Route::prefix('Recursoshumanos')->middleware('auth')->group(function () {
+    route::get('/personales',[RecursoshumanosController::class ,'personales'])->name('Recursoshumanos.personales')->middleware('verifyUserStatus')->middleware('can:personales');
+});
 // LOGISTICA
 Route::prefix('Logistica')->middleware('auth')->group(function () {
     route::get('/transportistas',[LogisticaController::class ,'transportistas'])->name('Logistica.transportistas')->middleware('verifyUserStatus')->middleware('can:transportistas');
@@ -64,6 +70,10 @@ Route::prefix('Logistica')->middleware('auth')->group(function () {
     route::get('/recursos',[LogisticaController::class ,'recursos'])->name('Logistica.recursos')->middleware('verifyUserStatus')->middleware('can:recursos');
 });
 
+//DESPACHOS
+Route::prefix('Despachos')->middleware('auth')->group(function () {
+    route::get('/gestionar_despachos',[DespachosController::class ,'gestionar_despachos'])->name('Despachos.gestionar_despachos')->middleware('verifyUserStatus')->middleware('can:gestionar_despachos');
+});
 // CONTROL DOCUMENTARIO
 Route::prefix('Controldocumentario')->middleware('auth')->group(function () {
     route::get('/registrardocumentos',[ControldocumentarioController::class ,'registrardocumentos'])->name('Controldocumentario.registrardocumentos')->middleware('verifyUserStatus')->middleware('can:registrardocumentos');
