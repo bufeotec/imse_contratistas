@@ -6,6 +6,7 @@ use App\Http\Controllers\IntranetController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ComercialController;
 use App\Http\Controllers\LogisticaController;
+use App\Http\Controllers\ControldocumentarioController;
 
 
 
@@ -61,4 +62,9 @@ Route::prefix('Logistica')->middleware('auth')->group(function () {
     route::get('/transportistas',[LogisticaController::class ,'transportistas'])->name('Logistica.transportistas')->middleware('verifyUserStatus')->middleware('can:transportistas');
     route::get('/vehiculos',[LogisticaController::class ,'vehiculos'])->name('Logistica.vehiculos')->middleware('verifyUserStatus')->middleware('can:vehiculos');
     route::get('/recursos',[LogisticaController::class ,'recursos'])->name('Logistica.recursos')->middleware('verifyUserStatus')->middleware('can:recursos');
+});
+
+// CONTROL DOCUMENTARIO
+Route::prefix('Controldocumentario')->middleware('auth')->group(function () {
+    route::get('/registrardocumentos',[ControldocumentarioController::class ,'registrardocumentos'])->name('Controldocumentario.registrardocumentos')->middleware('verifyUserStatus')->middleware('can:registrardocumentos');
 });

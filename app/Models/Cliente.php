@@ -127,4 +127,18 @@ class Cliente extends Model{
             return null;
         }
     }
+
+    public function buscar_cliente_numero($numero){
+        try {
+            $result = DB::table('clientes')
+                ->where('cliente_numero_documento','=',$numero)
+                ->where('cliente_estado','=',1)
+                ->first();
+
+        }catch  (\Exception $e){
+            $this->logs->insertarLog($e);
+            $result = [];
+        }
+        return $result;
+    }
 }

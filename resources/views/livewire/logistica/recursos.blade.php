@@ -36,6 +36,16 @@
                         @error('recurso_cantidad')<span class="message-error">{{ $message }}</span>@enderror
                     </div>
 
+                    <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
+                        <label for="recurso_estado" class="form-label">Estado</label>
+                        <select class="form-control" id="recurso_estado" wire:model="recurso_estado">
+                            <option value="">Seleccionar...</option>
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                            <option value="3">Mantenimiento</option>
+                        </select>
+                    </div>
+
                     <div class="col-lg-12 col-md-12 col-sm-12">
                         @if (session()->has('error_modal_agregar'))
                             <div class="alert alert-danger alert-dismissible show fade">
@@ -146,9 +156,19 @@
 
                                         </td>
                                         <td>
-                                            <span class="font-bold badge {{$lr->recurso_estado == 1 ? 'bg-label-success ' : 'bg-label-danger'}}">
-                                                {{$lr->recurso_estado == 1 ? 'Habilitado ' : 'Desabilitado'}}
-                                            </span>
+                                            @php
+                                            $estado = "";
+                                            if ($lr->recurso_estado == 1){
+                                                $estado = "Activo";
+                                            } elseif ($lr->recurso_estado == 2){
+                                                $estado = "Inactivo";
+                                            } elseif ($lr->recurso_estado == 3){
+                                                $estado = "Mantenimiento";
+                                            } else {
+                                                $estado = "-";
+                                            }
+                                            @endphp
+                                            {{$estado}}
                                         </td>
                                         <td>
                                             <x-btn-accion class=" text-primary"  wire:click="edit_data('{{ base64_encode($lr->id_recurso) }}')" data-bs-toggle="modal" data-bs-target="#modal_recurso">
@@ -157,19 +177,19 @@
                                                 </x-slot>
                                             </x-btn-accion>
 
-                                            @if($lr->recurso_estado == 1)
-                                                <x-btn-accion class=" text-danger" wire:click="btn_disable('{{ base64_encode($lr->id_recurso) }}',0)" data-bs-toggle="modal" data-bs-target="#modal_delete_recurso">
-                                                    <x-slot name="message">
-                                                        <i class="fa-solid fa-ban"></i>
-                                                    </x-slot>
-                                                </x-btn-accion>
-                                            @else
-                                                <x-btn-accion class=" text-success" wire:click="btn_disable('{{ base64_encode($lr->id_recurso) }}',1)" data-bs-toggle="modal" data-bs-target="#modal_delete_recurso">
-                                                    <x-slot name="message">
-                                                        <i class="fa-solid fa-check"></i>
-                                                    </x-slot>
-                                                </x-btn-accion>
-                                            @endif
+{{--                                            @if($lr->recurso_estado == 1)--}}
+{{--                                                <x-btn-accion class=" text-danger" wire:click="btn_disable('{{ base64_encode($lr->id_recurso) }}',0)" data-bs-toggle="modal" data-bs-target="#modal_delete_recurso">--}}
+{{--                                                    <x-slot name="message">--}}
+{{--                                                        <i class="fa-solid fa-ban"></i>--}}
+{{--                                                    </x-slot>--}}
+{{--                                                </x-btn-accion>--}}
+{{--                                            @else--}}
+{{--                                                <x-btn-accion class=" text-success" wire:click="btn_disable('{{ base64_encode($lr->id_recurso) }}',1)" data-bs-toggle="modal" data-bs-target="#modal_delete_recurso">--}}
+{{--                                                    <x-slot name="message">--}}
+{{--                                                        <i class="fa-solid fa-check"></i>--}}
+{{--                                                    </x-slot>--}}
+{{--                                                </x-btn-accion>--}}
+{{--                                            @endif--}}
                                         </td>
                                     </tr>
                                     @php $conteo++; @endphp

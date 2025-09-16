@@ -179,6 +179,7 @@ class Recursos extends Component{
                 $recurso_update->id_tipo_recurso = $this->id_tipo_recurso;
                 $recurso_update->id_medida = $this->id_medida;
                 $recurso_update->recurso_cantidad = $this->recurso_cantidad;
+                $recurso_update->recurso_estado = $this->recurso_estado;
 
                 // Guardar cambios en el vehículo
                 if (!$recurso_update->save()) {
