@@ -30,6 +30,7 @@ class Recursos extends Component{
     public $id_recurso  = "";
     public $id_tipo_recurso  = "";
     public $id_medida  = "";
+    public $recurso_nombre  = "";
     public $recurso_cantidad  = "";
     public $recurso_estado  = "";
     public $message_delete_recurso;
@@ -45,6 +46,7 @@ class Recursos extends Component{
         $this->id_recurso = "";
         $this->id_tipo_recurso = "";
         $this->id_medida = "";
+        $this->recurso_nombre = "";
         $this->recurso_cantidad = "";
         $this->recurso_estado = "";
     }
@@ -54,6 +56,7 @@ class Recursos extends Component{
         if ($Edit) {
             $this->id_tipo_recurso = $Edit->id_tipo_recurso;
             $this->id_medida = $Edit->id_medida;
+            $this->recurso_nombre = $Edit->recurso_nombre;
             $this->recurso_cantidad = $Edit->recurso_cantidad;
             $this->recurso_estado = $Edit->recurso_estado;
             $this->id_recurso = $Edit->id_recurso;
@@ -124,6 +127,7 @@ class Recursos extends Component{
                 'id_tipo_recurso' => 'required|integer',
                 'id_medida' => 'required|integer',
                 'recurso_cantidad' => 'required|numeric',
+                'recurso_nombre' => 'required|string',
                 'recurso_estado' => 'nullable|integer',
                 'id_recurso' => 'nullable|integer',
             ], [
@@ -132,6 +136,9 @@ class Recursos extends Component{
 
                 'id_medida.required' => 'La medida es obligatoria.',
                 'id_medida.string' => 'La medida debe ser un valor numérico.',
+
+                'recurso_nombre.required' => 'El nombre es obligatoria.',
+                'recurso_nombre.string' => 'El nombre debe ser una cadena de texto.',
 
                 'recurso_cantidad.required' => 'La capacidad es obligatoria.',
                 'recurso_cantidad.numeric' => 'La capacidad debe ser un valor numérico.',
@@ -152,6 +159,7 @@ class Recursos extends Component{
                 $recurso_save->id_users = Auth::id();
                 $recurso_save->id_tipo_recurso = $this->id_tipo_recurso;
                 $recurso_save->id_medida = $this->id_medida;
+                $recurso_save->recurso_nombre = $this->recurso_nombre;
                 $recurso_save->recurso_cantidad = $this->recurso_cantidad;
                 $recurso_save->recurso_estado_movimiento = 1;
                 $recurso_save->recurso_microtime = $microtime;
@@ -178,6 +186,7 @@ class Recursos extends Component{
                 $recurso_update = Recurso::findOrFail($this->id_recurso);
                 $recurso_update->id_tipo_recurso = $this->id_tipo_recurso;
                 $recurso_update->id_medida = $this->id_medida;
+                $recurso_update->recurso_nombre = $this->recurso_nombre;
                 $recurso_update->recurso_cantidad = $this->recurso_cantidad;
                 $recurso_update->recurso_estado = $this->recurso_estado;
 

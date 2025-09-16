@@ -9,6 +9,12 @@
             <form wire:submit.prevent="save_recurso">
                 <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
+                        <label for="recurso_nombre" class="form-label">Nombre (*)</label>
+                        <x-input-general type="text" id="recurso_nombre" wire:model="recurso_nombre" />
+                        @error('recurso_nombre')<span class="message-error">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
                         <label for="id_tipo_recurso" class="form-label">Tipo de Recurso (*)</label>
                         <select class="form-select" name="id_tipo_recurso" id="id_tipo_recurso" wire:model="id_tipo_recurso" >
                             <option value="">Seleccionar...</option>
@@ -135,6 +141,7 @@
                         <x-slot name="thead">
                             <tr>
                                 <th>N°</th>
+                                <th>Nombre</th>
                                 <th>Tipo de recurso</th>
                                 <th>Medida</th>
                                 <th>Cantidad</th>
@@ -149,6 +156,7 @@
                                 @foreach($listar_recursos as $lr)
                                     <tr>
                                         <td>{{$conteo}}</td>
+                                        <td>{{$lr->recurso_nombre}}</td>
                                         <td>{{$lr->tipo_recurso_concepto}}</td>
                                         <td>{{$lr->medida_nombre}}</td>
                                         <td>{{$lr->recurso_cantidad}}</td>

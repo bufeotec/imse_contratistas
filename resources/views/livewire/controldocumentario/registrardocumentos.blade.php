@@ -160,33 +160,191 @@
             <form wire:submit.prevent="save_personal_recurso">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                        @if (session()->has('error_modal_personal'))
+                        @if (session()->has('error_modal_personal_recurso'))
                             <div class="alert alert-danger alert-dismissible show fade">
-                                {{ session('error_modal_personal') }}
+                                {{ session('error_modal_personal_recurso') }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         @endif
                     </div>
 
-                    <div class="col-lg-6">
+                    <!-- PERSONALES -->
+                    <div class="col-lg-5">
                         <div class="row">
                             <div class="col-lg-12">
-                                <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                    <small class="text-primary">Información Personal</small>
-                                    <hr class="mb-0">
-                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+                                        <small class="text-primary">Información Personal</small>
+                                        <hr class="mb-0">
+                                    </div>
 
-                                <div class="col-lg-9 col-md-9 col-sm-12 mb-3">
-                                    <label class="form-label">Personal</label>
-                                    <select class="form-control" id="" wire:model="">
-                                        <option>Seleccionar...</option>
-                                    </select>
+                                    <div class="col-lg-9 col-md-9 col-sm-12 mb-3">
+                                        <label class="form-label">Personal</label>
+                                        <select class="form-control" wire:model="personal_seleccionado">
+                                            <option value="">Seleccionar...</option>
+                                            @foreach($listar_personales_activos as $lpv)
+                                                <option value="{{$lpv->id_personal}}">{{$lpv->personal_nombre}} {{$lpv->personal_apellido}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 col-md-2 col-sm-12 mb-3 mt-4">
+                                        <a class="btn btn-sm bg-info text-white" wire:click="agregar_personal">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
+                                    </div>
+
+                                    {{-- Mostrar mensajes de éxito o error --}}
+                                    @if (session()->has('success_agregar_personal'))
+                                        <div class="alert alert-success alert-dismissible show fade">
+                                            {{ session('success_agregar_personal') }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    @endif
+                                    @if (session()->has('error_eliminar_personal'))
+                                        <div class="alert alert-danger alert-dismissible show fade">
+                                            {{ session('error_eliminar_personal') }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    @endif
+
+                                    @if(count($personales_seleccionados) > 0)
+                                        <div class="col-lg-12 col-md-2 col-sm-12 mb-3">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-hover">
+                                                    <thead class="table-dark">
+                                                    <tr>
+                                                        <th>N°</th>
+                                                        <th>Nombre</th>
+                                                        <th>Apellido</th>
+                                                        <th>Correo</th>
+                                                        <th>Acciones</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @php $c_p = 1; @endphp
+                                                    @foreach($personales_seleccionados as $personal)
+                                                        <tr>
+                                                            <td>{{$c_p}}</td>
+                                                            <td>{{ $personal['personal_nombre'] }}</td>
+                                                            <td>{{ $personal['personal_apellido'] }}</td>
+                                                            <td>{{ $personal['personal_gmail'] }}</td>
+                                                            <td>
+                                                                <a class="btn btn-sm btn-danger text-white"
+                                                                        wire:click="eliminar_personal({{ $personal['id_personal'] }})">
+                                                                    <i class="fa-solid fa-trash"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                        @php $c_p++; @endphp
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
-                                <div class="col-lg-3 col-md-3 col-sm-12 mb-3"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6"></div>
+
+                    <!-- RECURSO -->
+                    <div class="col-lg-7">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 -col-sm-12 mb-3">
+                                <small class="text-primary">Información Recurso</small>
+                                <hr class="mb-0">
+                            </div>
+
+                            <div class="col-lg-9 col-md-9 col-sm-12 mb-3">
+                                <label class="form-label">Recursos</label>
+                                <select class="form-control" wire:model="recurso_seleccionado">
+                                    <option>Seleccionar...</option>
+                                    @foreach($listar_recursos_activos as $lra)
+                                        <option value="{{$lra->id_recurso}}"> {{$lra->recurso_nombre}} </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-12 mb-3 mt-4">
+                                <a class="btn btn-sm bg-primary text-white" wire:click="agregar_recurso">
+                                    <i class="fa-solid fa-plus"></i>
+                                </a>
+                            </div>
+
+                            <div class="col-lg-12 mb-3">
+                                @if (session()->has('success_recurso'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{ session('success_recurso') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                @endif
+
+                                @if (session()->has('error_recurso'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ session('error_recurso') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                @endif
+                            </div>
+
+                            @if(count($recursos_seleccionados) > 0)
+                                <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover">
+                                            <thead class="table-dark">
+                                            <tr>
+                                                <th>N°</th>
+                                                <th>Nombre</th>
+                                                <th>Tipo</th>
+                                                <th>Medida</th>
+                                                <th>Cantidad</th>
+                                                <th>Disponible</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @php $c_r = 1;@endphp
+                                            @foreach($recursos_seleccionados as $recurso)
+                                                <tr>
+                                                    <td>{{$c_r}}</td>
+                                                    <td>{{ $recurso['recurso_nombre'] }}</td>
+                                                    <td>{{ $recurso['tipo_recurso_concepto'] }}</td>
+                                                    <td>{{ $recurso['medida_nombre'] }}</td>
+                                                    <td>
+                                                        <div class="input-group" style="max-width: 120px;">
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm"
+                                                                   max="{{ $recurso['recurso_cantidad_maxima'] }}"
+                                                                   value="{{ $recurso['cantidad_solicitada'] }}"
+                                                                   onkeyup="validar_numeros(this.id)"
+                                                                   id="validar_cantidad({{ $recurso['id_recurso'] }}, $event.target.value)"
+                                                                   wire:change="validar_cantidad({{ $recurso['id_recurso'] }}, $event.target.value)">
+                                                        </div>
+
+                                                        @if (session()->has('error_cantidad_' . $recurso['id_recurso']))
+                                                            <small class="text-danger">
+                                                                {{ session('error_cantidad_' . $recurso['id_recurso']) }}
+                                                            </small>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        {{ $recurso['recurso_cantidad_maxima'] }}
+                                                    </td>
+                                                    <td>
+                                                        <a class="btn btn-sm btn-danger text-white"
+                                                                wire:click="eliminar_recurso({{ $recurso['id_recurso'] }})">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                @php $c_r++;@endphp
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
 
                     <div class="col-lg-12 col-md-12 col-sm-12 mt-3 text-end">
                         <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Cerrar</button>
@@ -257,7 +415,19 @@
                                         <td>{{$lv->guia_serie}} - {{$lv->guia_correlativo}}</td>
                                         <td>{{$lv->guia_fecha_emision}}</td>
                                         <td>{{$lv->guia_trabajo_realizar}}</td>
-                                        <td>{{$lv->guia_modalidad_transporte}}</td>
+                                        <td>
+                                            @php
+                                            $modalidad = "";
+                                            if ($lv->guia_modalidad_transporte == 1){
+                                                $modalidad = "Publico";
+                                            } elseif ($lv->guia_modalidad_transporte == 2){
+                                                $modalidad = "Privado";
+                                            } else {
+                                                $modalidad = "-";
+                                            }
+                                            @endphp
+                                            {{$modalidad}}
+                                        </td>
                                         <td>
                                             @if(!empty($lv->guia_documento))
                                                 <a href="{{ asset($lv->guia_documento) }}" target="_blank">
@@ -273,8 +443,8 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a class="btn btn-sm bg-primary text-white" data-bs-toggle="modal" data-bs-target="#modal_registrar_personal_recurso">
-                                                <i class="fa-solid fa-person-through-window"></i>
+                                            <a class="btn btn-sm bg-primary text-white" wire:click="btn_modal_registrar('{{ base64_encode($lv->id_guia) }}')" data-bs-toggle="modal" data-bs-target="#modal_registrar_personal_recurso">
+                                                <i class="fa-solid fa-check"></i>
                                             </a>
                                         </td>
                                     </tr>

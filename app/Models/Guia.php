@@ -22,6 +22,7 @@ class Guia extends Model{
         try {
             $query = DB::table('guias as g')
                 ->join('clientes as c', 'g.id_cliente', 'c.id_cliente')
+                ->where('g.guia_estado', '=', 1)
                 ->where(function($q) use ($search) {
                     $q->where('g.guia_serie', 'like', '%' . $search . '%')
                         ->orWhereNull('g.guia_serie');
