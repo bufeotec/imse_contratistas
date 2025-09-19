@@ -1,4 +1,4 @@
-<div>
+        <div>
     <ul class="menu-inner py-1">
         @php $menutab = $urlactual_sidebar @endphp
         <!-- Dashboard -->
