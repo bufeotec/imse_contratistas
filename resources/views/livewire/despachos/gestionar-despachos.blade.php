@@ -24,82 +24,82 @@
     </style>
 
 
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="loader mt-2 w-100" wire:loading wire:target="seleccionar, quitar, transportista_id, guardar_despacho"></div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        @if (session()->has('success'))
+            <div class="alert alert-success alert-dismissible show fade">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        @if (session()->has('error'))
+            <div class="alert alert-danger alert-dismissible show fade">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    </div>
+
     <div class="row g-3">
         {{-- GUÍAS DISPONIBLES --}}
         <div class="col-lg-6">
             <div class="card card-soft">
                 <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
                         <h5 class="mb-0 card-title-sm">GUÍAS DISPONIBLES</h5>
                     </div>
 
                     <div class="input-icon mb-3">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" class="form-control" placeholder="Buscar guía">
+                        <input type="text" class="form-control" placeholder="Buscar por cliente, serie o correlativo" wire:model.live="search_guia">
                     </div>
-
-                    <br>
 
                     <div class="table-responsive scroll-y">
                         <table class="table table-sm align-middle compact-table">
                             <thead class="table-primary">
                             <tr class="text-center align-middle">
-                                <th style="width:50px">#</th>
+                                <th style="width:56px">Sel.</th>
                                 <th>Fecha emisión guía</th>
                                 <th>Guía</th>
                                 <th>Nombre del cliente</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {{-- Fila 1 (estático) --}}
-                            <tr class="text-center">
-                                <td>
-                                    <button class="btn btn-sm btn-success">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">25 mar. 2025</div>
-                                    <div>UBIGEO: <b>LIMA - LIMA - LIMA</b></div>
-                                </td>
-                                <td>
-                                    <a href="javascript:void(0)" class="text-decoration-none">T0010015243</a>
-                                </td>
-                                <td>INVERSIONES RAPIVENTAS S.A.C.</td>
-                            </tr>
-
-                            {{-- Fila 2 --}}
-                            <tr class="text-center">
-                                <td>
-                                    <button class="btn btn-sm btn-success">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">25 mar. 2025</div>
-                                    <div>UBIGEO: <b>LIMA - SAN JUAN DE LURIGANCHO</b></div>
-                                </td>
-                                <td><a href="javascript:void(0)" class="text-decoration-none">T0010015227</a></td>
-                                <td>HIPERMERCADOS TOTTUS S.A</td>
-                            </tr>
-
-                            {{-- Fila 3 --}}
-                            <tr class="text-center">
-                                <td>
-                                    <button class="btn btn-sm btn-success">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">26 mar. 2025</div>
-                                    <div>UBIGEO: <b>LIMA - SAN MARTÍN DE PORRES</b></div>
-                                </td>
-                                <td><a href="javascript:void(0)" class="text-decoration-none">T0010015260</a></td>
-                                <td>RIZOS BELLOS PERÚ E.I.R.L.</td>
-                            </tr>
+                            @forelse($guias_disponibles as $g)
+                                <tr class="text-center">
+                                    <td>
+                                        <button class="btn btn-sm btn-success" title="Seleccionar" wire:click="seleccionar('{{ base64_encode($g->id_guia) }}')">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </td>
+                                    <td>{{ \Carbon\Carbon::parse($g->guia_fecha_emision)->format('d/m/Y') }}</td>
+                                    <td>
+                                        <a href="javascript:void(0)" class="text-decoration-none">
+                                            {{ $g->guia_serie }}-{{ $g->guia_correlativo }}
+                                        </a>
+                                    </td>
+                                    <td>{{ $g->cliente_razon_social }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center">No se han encontrado resultados.</td>
+                                </tr>
+                            @endforelse
                             </tbody>
                         </table>
                     </div>
+
+                    @if ($guias_disponibles->hasPages())
+                        <div class="mt-2 d-flex justify-content-end">
+                            {{ $guias_disponibles->links(data: ['scrollTo' => false]) }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -111,19 +111,30 @@
                     <div class="row g-3">
                         <div class="col-md-5">
                             <label class="form-label">Transportistas</label>
-                            <select class="form-select">
+                            <select class="form-select" wire:model.live="transportista_id">
                                 <option value="">Seleccionar...</option>
+                                @foreach($listar_transportistas as $t)
+                                    <option value="{{ $t->id_transportista }}">{{ $t->transportista_razon_social }}</option>
+                                @endforeach
                             </select>
+                            @error('transportista_id') <span class="message-error d-block mt-1">{{ $message }}</span> @enderror
                         </div>
+
                         <div class="col-md-4">
                             <label class="form-label">Vehículo</label>
-                            <select class="form-select">
+                            <select class="form-select" wire:model.live="vehiculo_id" @disabled(!$transportista_id)>
                                 <option value="">Seleccionar...</option>
+                                @foreach($listar_vehiculos as $v)
+                                    <option value="{{ $v->id_vehiculo }}">{{ $v->vehiculo_placa }}</option>
+                                @endforeach
                             </select>
+                            @error('vehiculo_id') <span class="message-error d-block mt-1">{{ $message }}</span> @enderror
                         </div>
+
                         <div class="col-md-3">
                             <label class="form-label">Fecha de despacho</label>
-                            <input type="date" class="form-control" value="{{ now()->format('Y-m-d') }}">
+                            <input type="date" class="form-control" wire:model="fecha_despacho">
+                            @error('fecha_despacho') <span class="message-error d-block mt-1">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
@@ -145,47 +156,27 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {{-- Row A (estático) --}}
-                            <tr class="text-center">
-                                <td>25 mar. 2025</td>
-                                <td>T0010015227</td>
-                                <td>HIPERMERCADOS TOTTUS S.A</td>
-                                <td class="text-start">
-                                    DENOMINADO LOTE N°6 DEL EXFUNDO NIEVERÍA LURIGANCHO - CHOSICA<br>
-                                    <span>LIMA - SAN JUAN DE LURIGANCHO</span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-
-                            {{-- Row B --}}
-                            <tr class="text-center">
-                                <td>26 mar. 2025</td>
-                                <td>T0010015260</td>
-                                <td>RIZOS BELLOS PERÚ E.I.R.L.</td>
-                                <td class="text-start">
-                                    MZA. R LOTE 11 URB. LOS LIBERTADORES<br>
-                                    <span>LIMA - SAN MARTÍN DE PORRES</span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-
-                            {{-- Row C --}}
-                            <tr class="text-center">
-                                <td>25 mar. 2025</td>
-                                <td>T0010015233</td>
-                                <td>IMPORTACIONES EUROSMARK E.I.R.L.</td>
-                                <td class="text-start">
-                                    JR PUNO 952 MERCADO CENTRAL - LIMA<br>
-                                    <span>LIMA - LIMA - LIMA</span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
+                            @if(count($guias_seleccionadas) > 0)
+                                @foreach($guias_seleccionadas as $row)
+                                    <tr class="text-center">
+                                        <td>{{ \Carbon\Carbon::parse($row['fecha'])->format('d/m/Y') }}</td>
+                                        <td>{{ $row['guia'] }}</td>
+                                        <td>{{ $row['cliente'] }}</td>
+                                        <td>
+                                            {{ $row['direccion'] }}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" title="Quitar" wire:click="quitar('{{ base64_encode($row['id_guia']) }}')">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="6" class="text-center">No hay guías seleccionadas.</td>
+                                </tr>
+                            @endif
                             </tbody>
                         </table>
                     </div>
@@ -193,10 +184,20 @@
             </div>
 
             <div class="sticky-footer mt-4 d-flex justify-content-end">
-                <button class="btn btn-danger px-4">
+                <button class="btn btn-primary px-4" wire:click="guardar_despacho">
                     Guardar Despacho
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+@script
+<script>
+    // abrir el PDF en nueva pestaña
+    $wire.on('openPdf', (e) => {
+        const url = e?.url || e;
+        if (url) window.open(url, '_blank');
+    });
+</script>
+@endscript

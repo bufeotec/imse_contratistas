@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Codedge\Fpdf\Fpdf\Fpdf;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Luecano\NumeroALetras\NumeroALetras;
+
 class General extends Model
 {
     use HasFactory;
@@ -258,4 +262,245 @@ class General extends Model
         }
     }
 
+    public function imprimir_ticket_os_pdf_($id_despacho, $tipo)
+    {
+        try {
+            $despacho = Despacho::with('despacho_detalle')->findOrFail($id_despacho);
+
+            $guia = DB::table('despachos_detalle')
+                ->join('guias', 'despachos_detalle.id_guia', '=', 'guias.id_guia')
+                ->join('clientes', 'guias.id_cliente', '=', 'clientes.id_cliente')
+                ->where('despachos_detalle.id_despacho', $despacho->id_despacho)
+                ->first();
+
+            if ($guia) {
+                // Obtener los datos del cliente y asignar "No disponible" si es nulo
+                $cliente_razon_social = $guia->cliente_razon_social ?? 'No disponible';
+                $cliente_email = $guia->cliente_email ?? 'No disponible';
+                $cliente_telefono = $guia->cliente_telefono ?? 'No disponible';
+                $cliente_direccion = $guia->cliente_direccion ?? 'No disponible';
+
+                // Para la fecha de entrega, usamos la fecha de emisión de la guía
+                $fecha_entrega = Carbon::parse($guia->guia_fecha_emision)->format('d/m/Y');
+            }
+
+            // --- 2) Inicio PDF ---
+            $pdf = new Fpdf();
+            $pdf->SetMargins(20, 15, 20);
+            $pdf->AddPage();
+
+            // Logo (Se puede colocar un logo en la parte superior)
+            $logo = public_path('uploads/imse/logo_imse.png');
+            if (file_exists($logo)) {
+                $pdf->Image($logo, null, null, 50, 35);
+            }
+            $pdf->Ln(5);
+
+            // Título del PDF con el diseño correcto
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, 'IMSE CONTRATISTAS GENERALES E.I.R.L.', 0, 1, 'C');
+            $pdf->Cell(0, 8, 'ORDEN DE SERVICIO', 0, 1, 'C');
+            $pdf->Ln(10);
+
+            // Datos del cliente
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->Cell(30, 8, 'Nombre:', 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(70, 8, utf8_decode($cliente_razon_social), 0, 1, 'L');
+
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->Cell(30, 8, 'Email:', 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(70, 8, utf8_decode($cliente_email), 0, 1, 'L');
+
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->Cell(30, 8, utf8_decode('Teléfono:'), 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(70, 8, utf8_decode($cliente_telefono), 0, 1, 'L');
+
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->Cell(30, 8, utf8_decode('Dirección:'), 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(70, 8, utf8_decode($cliente_direccion), 0, 1, 'L');
+
+            $pdf->Ln(10);
+
+            // Datos de la orden de servicio
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(50, 8, utf8_decode('Número de Orden:'), 0, 0, 'L');
+            $pdf->Cell(70, 8, 'OS-' . $despacho->id_despacho, 0, 1, 'L');
+            $pdf->Cell(50, 8, 'Fecha de Ingreso:', 0, 0, 'L');
+            $pdf->Cell(70, 8, $fecha_entrega, 0, 1, 'L');
+
+            $pdf->Cell(50, 8, 'Fecha de Entrega:', 0, 0, 'L');
+            $pdf->Cell(70, 8, Carbon::parse($despacho->despacho_fecha)->format('d/m/Y'), 0, 1, 'L');
+
+            $pdf->Ln(10);
+
+            // Descripción del servicio (con tabla)
+            $pdf->SetFont('Arial', 'B', 9);
+            $pdf->SetFillColor(240,240,240);
+            $pdf->Cell(20, 10, 'Cantidad', 1, 0, 'C', 1);
+            $pdf->Cell(102, 10, utf8_decode('Descripción'), 1, 0, 'C', 1);
+            $pdf->Cell(52, 10, 'Precio', 1, 1, 'C', 1);
+            $pdf->SetWidths([20,102,52]);
+
+            // Mostrar detalles de las guías seleccionadas
+            $pdf->SetFont('Arial', '', 9);
+            $i = 1;
+            foreach ($despacho->despacho_detalle as $detalle) {
+                $guia = DB::table('guias')->where('id_guia', $detalle->id_guia)->first();
+                $pdf->Row([
+                    $i,
+                    utf8_decode($guia->guia_trabajo_realizar),
+                    'S/. 0.00',
+                ]);
+            }
+
+            if ($tipo === 1) {
+                $pdf->Output();
+                exit;
+            } else {
+                $path = "comprobantes_despachos/despacho_{$despacho->id_despacho}.pdf";
+                $pdf->Output('F', public_path($path));
+                return $path;
+            }
+        } catch (\Exception $e) {
+            $this->logs->insertarLog($e);
+        }
+    }
+
+    public function imprimir_ticket_os_pdf($id_despacho, $tipo)
+    {
+        try {
+            $despacho = Despacho::with('despacho_detalle')->findOrFail($id_despacho);
+
+            $guia = DB::table('despachos_detalle')
+                ->join('guias', 'despachos_detalle.id_guia', '=', 'guias.id_guia')
+                ->join('clientes', 'guias.id_cliente', '=', 'clientes.id_cliente')
+                ->where('despachos_detalle.id_despacho', $despacho->id_despacho)
+                ->first();
+
+            if ($guia) {
+                $cliente_razon_social = $guia->cliente_razon_social ?? 'No disponible';
+                $cliente_email = $guia->cliente_email ?? 'No disponible';
+                $cliente_telefono = $guia->cliente_telefono ?? 'No disponible';
+                $cliente_direccion = $guia->cliente_direccion ?? 'No disponible';
+
+                $fecha_entrega = Carbon::parse($guia->guia_fecha_emision)->format('d/m/Y');
+            }
+
+            $pdf = new Fpdf();
+            $pdf->SetMargins(20, 15, 20);
+            $pdf->AddPage();
+
+            $marco = public_path('uploads/imse/marco_v1.png');
+            if (file_exists($marco)) {
+                $pdf->Image($marco, 0, 0, 210, 40);
+            }
+
+            // Logo
+            $logo = public_path('uploads/imse/logo_imse.png');
+            if (file_exists($logo)) {
+                $pdf->Image($logo, 140, null, 50, 25);
+            }
+            $pdf->Ln(5);
+
+            // Título del PDF con el diseño correcto
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, 'IMSE CONTRATISTAS GENERALES E.I.R.L.', 0, 1, 'C');
+            $pdf->Cell(0, 8, 'ORDEN DE SERVICIO', 0, 1, 'C');
+            $pdf->Ln(10);
+
+            // Dibujar rectángulos para datos del cliente y orden de servicio
+            $y_rect = $pdf->GetY();
+            $pdf->RoundedRect(20, $y_rect, 85, 40, 2, 'D');
+            $pdf->RoundedRect(110, $y_rect, 85, 40, 2, 'D');
+
+            // Escribir datos del cliente
+            $y_cliente = $y_rect + 5;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(25, $y_cliente);
+            $pdf->Cell(20, 8, 'Nombre:', 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, utf8_decode($cliente_razon_social), 0, 1, 'L');
+
+            $y_cliente += 8;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(25, $y_cliente);
+            $pdf->Cell(20, 8, 'Email:', 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, utf8_decode($cliente_email), 0, 1, 'L');
+
+            $y_cliente += 8;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(25, $y_cliente);
+            $pdf->Cell(20, 8, utf8_decode('Teléfono:'), 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, utf8_decode($cliente_telefono), 0, 1, 'L');
+
+            $y_cliente += 8;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(25, $y_cliente);
+            $pdf->Cell(20, 8, utf8_decode('Dirección:'), 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, utf8_decode($cliente_direccion), 0, 1, 'L');
+
+            // Escribir datos de la orden de servicio
+            $y_orden = $y_rect + 5;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(115, $y_orden);
+            $pdf->Cell(35, 8, utf8_decode('Número de Orden:'), 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, 'OS-' . $despacho->id_despacho, 0, 1, 'L');
+
+            $y_orden += 8;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(115, $y_orden);
+            $pdf->Cell(35, 8, 'Fecha de Ingreso:', 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, $fecha_entrega, 0, 1, 'L');
+
+            $y_orden += 8;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(115, $y_orden);
+            $pdf->Cell(35, 8, 'Fecha de Entrega:', 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, Carbon::parse($despacho->despacho_fecha)->format('d/m/Y'), 0, 1, 'L');
+
+            // Mover el cursor debajo de los rectángulos
+            $pdf->SetY($y_rect + 40 + 10);
+
+            // Descripción del servicio (con tabla)
+            $pdf->SetFont('Arial', 'B', 9);
+            $pdf->SetFillColor(240,240,240);
+            $pdf->Cell(20, 10, 'Cantidad', 1, 0, 'C', 1);
+            $pdf->Cell(107, 10, utf8_decode('Descripción'), 1, 0, 'C', 1);
+            $pdf->Cell(47, 10, 'Precio', 1, 1, 'C', 1);
+            $pdf->SetWidths([20,107,47]);
+
+            // Mostrar detalles de las guías seleccionadas
+            $pdf->SetFont('Arial', '', 9);
+            $i = 1;
+            foreach ($despacho->despacho_detalle as $detalle) {
+                $guia = DB::table('guias')->where('id_guia', $detalle->id_guia)->first();
+                $pdf->Row([
+                    $i,
+                    utf8_decode($guia->guia_trabajo_realizar),
+                    'S/. 0.00',
+                ]);
+            }
+
+            if ($tipo === 1) {
+                $pdf->Output();
+                exit;
+            } else {
+                $path = "comprobantes_despachos/despacho_{$despacho->id_despacho}.pdf";
+                $pdf->Output('F', public_path($path));
+                return $path;
+            }
+        } catch (\Exception $e) {
+            $this->logs->insertarLog($e);
+        }
+    }
 }
