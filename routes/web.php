@@ -9,6 +9,7 @@ use App\Http\Controllers\LogisticaController;
 use App\Http\Controllers\ControldocumentarioController;
 use App\Http\Controllers\RecursoshumanosController;
 use App\Http\Controllers\DespachosController;
+use App\Http\Controllers\ReportesController;
 
 
 
@@ -77,4 +78,9 @@ Route::prefix('Despachos')->middleware('auth')->group(function () {
 // CONTROL DOCUMENTARIO
 Route::prefix('Controldocumentario')->middleware('auth')->group(function () {
     route::get('/registrardocumentos',[ControldocumentarioController::class ,'registrardocumentos'])->name('Controldocumentario.registrardocumentos')->middleware('verifyUserStatus')->middleware('can:registrardocumentos');
+});
+
+//Reportes
+Route::prefix('Reportes')->middleware('auth')->group(function () {
+    route::get('/historial_guias',[ReportesController::class ,'historial_guias'])->name('Reportes.historial_guias')->middleware('verifyUserStatus')->middleware('can:historial_guias');
 });

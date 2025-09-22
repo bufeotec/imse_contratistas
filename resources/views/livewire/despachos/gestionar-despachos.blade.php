@@ -109,7 +109,7 @@
             <div class="card card-soft mb-3">
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-5">
+                        <div class="col-md-3">
                             <label class="form-label">Transportistas</label>
                             <select class="form-select" wire:model.live="transportista_id">
                                 <option value="">Seleccionar...</option>
@@ -120,7 +120,7 @@
                             @error('transportista_id') <span class="message-error d-block mt-1">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">Vehículo</label>
                             <select class="form-select" wire:model.live="vehiculo_id" @disabled(!$transportista_id)>
                                 <option value="">Seleccionar...</option>
@@ -129,6 +129,12 @@
                                 @endforeach
                             </select>
                             @error('vehiculo_id') <span class="message-error d-block mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">N° Orden</label>
+                            <input type="text" class="form-control" wire:model="despacho_nr_orden">
+                            @error('despacho_nr_orden') <span class="message-error d-block mt-1">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="col-md-3">

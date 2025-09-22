@@ -274,87 +274,194 @@ class General extends Model
                 ->first();
 
             if ($guia) {
-                // Obtener los datos del cliente y asignar "No disponible" si es nulo
                 $cliente_razon_social = $guia->cliente_razon_social ?? 'No disponible';
                 $cliente_email = $guia->cliente_email ?? 'No disponible';
                 $cliente_telefono = $guia->cliente_telefono ?? 'No disponible';
                 $cliente_direccion = $guia->cliente_direccion ?? 'No disponible';
 
-                // Para la fecha de entrega, usamos la fecha de emisión de la guía
                 $fecha_entrega = Carbon::parse($guia->guia_fecha_emision)->format('d/m/Y');
             }
 
-            // --- 2) Inicio PDF ---
             $pdf = new Fpdf();
             $pdf->SetMargins(20, 15, 20);
             $pdf->AddPage();
 
-            // Logo (Se puede colocar un logo en la parte superior)
+            $marco = public_path('uploads/imse/marco_v1.png');
+            if (file_exists($marco)) {
+                $pdf->Image($marco, 0, 0, 210, 40);
+            }
+
+            // Logo
             $logo = public_path('uploads/imse/logo_imse.png');
             if (file_exists($logo)) {
-                $pdf->Image($logo, null, null, 50, 35);
+                $pdf->Image($logo, 140, null, 50, 25);
             }
             $pdf->Ln(5);
 
-            // Título del PDF con el diseño correcto
+            // Encabezado
             $pdf->SetFont('Arial', 'B', 16);
             $pdf->Cell(0, 10, 'IMSE CONTRATISTAS GENERALES E.I.R.L.', 0, 1, 'C');
             $pdf->Cell(0, 8, 'ORDEN DE SERVICIO', 0, 1, 'C');
             $pdf->Ln(10);
 
-            // Datos del cliente
+            // Marcos de info
+            $y_rect = $pdf->GetY();
+            $pdf->RoundedRect(20, $y_rect, 85, 40, 2, 'D');
+            $pdf->RoundedRect(110, $y_rect, 85, 40, 2, 'D');
+
+            // Cliente
+            $y_cliente = $y_rect + 5;
             $pdf->SetFont('Arial', 'B', 10);
-            $pdf->Cell(30, 8, 'Nombre:', 0, 0, 'L');
+            $pdf->SetXY(25, $y_cliente);
+            $pdf->Cell(20, 8, 'Nombre:', 0, 0, 'L');
             $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(70, 8, utf8_decode($cliente_razon_social), 0, 1, 'L');
+            $pdf->Cell(40, 8, utf8_decode($cliente_razon_social ?? 'No disponible'), 0, 1, 'L');
 
+            $y_cliente += 8;
             $pdf->SetFont('Arial', 'B', 10);
-            $pdf->Cell(30, 8, 'Email:', 0, 0, 'L');
+            $pdf->SetXY(25, $y_cliente);
+            $pdf->Cell(20, 8, 'Email:', 0, 0, 'L');
             $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(70, 8, utf8_decode($cliente_email), 0, 1, 'L');
+            $pdf->Cell(40, 8, utf8_decode($cliente_email ?? 'No disponible'), 0, 1, 'L');
 
+            $y_cliente += 8;
             $pdf->SetFont('Arial', 'B', 10);
-            $pdf->Cell(30, 8, utf8_decode('Teléfono:'), 0, 0, 'L');
+            $pdf->SetXY(25, $y_cliente);
+            $pdf->Cell(20, 8, utf8_decode('Teléfono:'), 0, 0, 'L');
             $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(70, 8, utf8_decode($cliente_telefono), 0, 1, 'L');
+            $pdf->Cell(40, 8, utf8_decode($cliente_telefono ?? 'No disponible'), 0, 1, 'L');
 
+            $y_cliente += 8;
             $pdf->SetFont('Arial', 'B', 10);
-            $pdf->Cell(30, 8, utf8_decode('Dirección:'), 0, 0, 'L');
+            $pdf->SetXY(25, $y_cliente);
+            $pdf->Cell(20, 8, utf8_decode('Dirección:'), 0, 0, 'L');
             $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(70, 8, utf8_decode($cliente_direccion), 0, 1, 'L');
+            $pdf->Cell(40, 8, utf8_decode($cliente_direccion ?? 'No disponible'), 0, 1, 'L');
 
-            $pdf->Ln(10);
-
-            // Datos de la orden de servicio
+            // Orden de servicio
+            $y_orden = $y_rect + 5;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(115, $y_orden);
+            $pdf->Cell(35, 8, utf8_decode('Número de Orden:'), 0, 0, 'L');
             $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(50, 8, utf8_decode('Número de Orden:'), 0, 0, 'L');
-            $pdf->Cell(70, 8, 'OS-' . $despacho->id_despacho, 0, 1, 'L');
-            $pdf->Cell(50, 8, 'Fecha de Ingreso:', 0, 0, 'L');
-            $pdf->Cell(70, 8, $fecha_entrega, 0, 1, 'L');
+            $pdf->Cell(40, 8, 'OS-' . $despacho->id_despacho, 0, 1, 'L');
 
-            $pdf->Cell(50, 8, 'Fecha de Entrega:', 0, 0, 'L');
-            $pdf->Cell(70, 8, Carbon::parse($despacho->despacho_fecha)->format('d/m/Y'), 0, 1, 'L');
+            $y_orden += 8;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(115, $y_orden);
+            $pdf->Cell(35, 8, 'Fecha de Ingreso:', 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, $fecha_entrega ?? '-', 0, 1, 'L');
 
-            $pdf->Ln(10);
+            $y_orden += 8;
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetXY(115, $y_orden);
+            $pdf->Cell(35, 8, 'Fecha de Entrega:', 0, 0, 'L');
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(40, 8, Carbon::parse($despacho->despacho_fecha)->format('d/m/Y'), 0, 1, 'L');
 
-            // Descripción del servicio (con tabla)
+            // Cursor debajo de los rectángulos
+            $pdf->SetY($y_rect + 40 + 10);
+
+            // =========================================
+            // Descripción del servicio (tal cual usas)
+            // =========================================
             $pdf->SetFont('Arial', 'B', 9);
             $pdf->SetFillColor(240,240,240);
             $pdf->Cell(20, 10, 'Cantidad', 1, 0, 'C', 1);
-            $pdf->Cell(102, 10, utf8_decode('Descripción'), 1, 0, 'C', 1);
-            $pdf->Cell(52, 10, 'Precio', 1, 1, 'C', 1);
-            $pdf->SetWidths([20,102,52]);
+            $pdf->Cell(107, 10, utf8_decode('Descripción'), 1, 0, 'C', 1);
+            $pdf->Cell(47, 10, 'Precio', 1, 1, 'C', 1);
+            $pdf->SetWidths([20,107,47]);
 
-            // Mostrar detalles de las guías seleccionadas
             $pdf->SetFont('Arial', '', 9);
             $i = 1;
             foreach ($despacho->despacho_detalle as $detalle) {
-                $guia = DB::table('guias')->where('id_guia', $detalle->id_guia)->first();
+                $guiaRow = DB::table('guias')->where('id_guia', $detalle->id_guia)->first();
                 $pdf->Row([
                     $i,
-                    utf8_decode($guia->guia_trabajo_realizar),
+                    utf8_decode($guiaRow->guia_trabajo_realizar ?? ''),
                     'S/. 0.00',
                 ]);
+                // $i++; // si más adelante quieres incrementar, lo haces; por ahora lo dejo como lo tenías
+            }
+
+            $pdf->Ln(6);
+
+            // guías incluidas en este despacho
+            $pdf->SetFont('Arial', 'BU', 10);
+            $pdf->Cell(174, 8, utf8_decode('Guías incluidas en este despacho'), 0, 1, 'L',);
+
+            $pdf->SetFont('Arial', 'B', 9);
+            $pdf->SetFillColor(245,245,245);
+            $pdf->Cell(20, 8, utf8_decode('N°'), 1, 0, 'C', 1);
+            $pdf->Cell(154, 8, utf8_decode('Guía (Serie - Correlativo)'), 1, 1, 'C', 1);
+
+            $pdf->SetFont('Arial', '', 9);
+            $n = 1;
+            foreach ($despacho->despacho_detalle as $detalle) {
+                $g = DB::table('guias')
+                    ->select('guia_serie','guia_correlativo')
+                    ->where('id_guia', $detalle->id_guia)
+                    ->first();
+
+                $codigo = $g ? ($g->guia_serie . '-' . $g->guia_correlativo) : '-';
+                $pdf->Cell(20, 8, (string)$n, 1, 0, 'C');
+                $pdf->Cell(154, 8, utf8_decode($codigo), 1, 1, 'C');
+                $n++;
+            }
+
+            $pdf->Ln(6);
+
+            // NUEVO: Materiales por guía
+            // (gr.id_guia -> r.recurso_nombre, tr.tipo_recurso_concepto, gr.guia_recurso_cantidad)
+            $pdf->SetFont('Arial', 'BU', 10);
+            $pdf->Cell(174, 8, utf8_decode('Materiales por guía'), 0, 1, 'L');
+
+            foreach ($despacho->despacho_detalle as $detalle) {
+                $g = DB::table('guias')
+                    ->select('guia_serie','guia_correlativo')
+                    ->where('id_guia', $detalle->id_guia)
+                    ->first();
+                $codigo = $g ? ($g->guia_serie . '-' . $g->guia_correlativo) : '-';
+
+                // Subtítulo de la guía
+                $pdf->SetFont('Arial', 'B', 9);
+                $pdf->Cell(0, 7, utf8_decode('Guía: ' . $codigo), 0, 1, 'L');
+
+                // Header materiales
+                $pdf->SetFont('Arial', 'B', 9);
+                $pdf->SetFillColor(245,245,245);
+                $pdf->Cell(20, 8, utf8_decode('Cant.'), 1, 0, 'C', 1);
+                $pdf->Cell(50, 8, utf8_decode('Tipo'), 1, 0, 'C', 1);
+                $pdf->Cell(104, 8, utf8_decode('Recurso'), 1, 1, 'C', 1);
+                $pdf->SetWidths([20,50,104]);
+
+                // materiales de la guía
+                $materiales = DB::table('guias_recursos as gr')
+                    ->join('recursos as r', 'r.id_recurso', '=', 'gr.id_recurso')
+                    ->leftJoin('tipos_recursos as tr', 'tr.id_tipo_recurso', '=', 'r.id_tipo_recurso')
+                    ->select(
+                        'gr.guia_recurso_cantidad',
+                        'r.recurso_nombre',
+                        'tr.tipo_recurso_concepto'
+                    )
+                    ->where('gr.id_guia', $detalle->id_guia)
+                    ->get();
+
+                $pdf->SetFont('Arial', '', 9);
+                if ($materiales->count() === 0) {
+                    $pdf->Cell(190, 8, utf8_decode('Sin materiales registrados.'), 1, 1, 'C');
+                } else {
+                    foreach ($materiales as $m) {
+                        $pdf->Row([
+                            (string)($m->guia_recurso_cantidad ?? 0),
+                            utf8_decode($m->tipo_recurso_concepto ?? '-'),
+                            utf8_decode($m->recurso_nombre ?? '-'),
+                        ]);
+                    }
+                }
+
+                $pdf->Ln(4);
             }
 
             if ($tipo === 1) {
@@ -386,7 +493,6 @@ class General extends Model
                 $cliente_email = $guia->cliente_email ?? 'No disponible';
                 $cliente_telefono = $guia->cliente_telefono ?? 'No disponible';
                 $cliente_direccion = $guia->cliente_direccion ?? 'No disponible';
-
                 $fecha_entrega = Carbon::parse($guia->guia_fecha_emision)->format('d/m/Y');
             }
 
@@ -406,72 +512,74 @@ class General extends Model
             }
             $pdf->Ln(5);
 
-            // Título del PDF con el diseño correcto
+            // Encabezado
             $pdf->SetFont('Arial', 'B', 16);
             $pdf->Cell(0, 10, 'IMSE CONTRATISTAS GENERALES E.I.R.L.', 0, 1, 'C');
             $pdf->Cell(0, 8, 'ORDEN DE SERVICIO', 0, 1, 'C');
             $pdf->Ln(10);
 
-            // Dibujar rectángulos para datos del cliente y orden de servicio
-            $y_rect = $pdf->GetY();
-            $pdf->RoundedRect(20, $y_rect, 85, 40, 2, 'D');
-            $pdf->RoundedRect(110, $y_rect, 85, 40, 2, 'D');
+            // ====== Marcos de info (dinámicos con wrap) ======
+            $y_top = $pdf->GetY();
 
-            // Escribir datos del cliente
-            $y_cliente = $y_rect + 5;
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetXY(25, $y_cliente);
-            $pdf->Cell(20, 8, 'Nombre:', 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(40, 8, utf8_decode($cliente_razon_social), 0, 1, 'L');
+            // helper para escribir "Etiqueta : Valor (multilínea)" y devolver el nuevo Y
+            $writeLV = function($pdf, $x, $y, $label, $value, $labelW, $valueW, $lineH = 6) {
+                $pdf->SetXY($x, $y);
+                $pdf->SetFont('Arial', 'B', 10);
+                $pdf->Cell($labelW, $lineH, utf8_decode($label), 0, 0, 'L');
 
-            $y_cliente += 8;
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetXY(25, $y_cliente);
-            $pdf->Cell(20, 8, 'Email:', 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(40, 8, utf8_decode($cliente_email), 0, 1, 'L');
+                // valor multilínea
+                $pdf->SetFont('Arial', '', 10);
+                $pdf->SetXY($x + $labelW, $y);
+                $pdf->MultiCell($valueW, $lineH, utf8_decode($value ?? 'No disponible'), 0, 'L');
 
-            $y_cliente += 8;
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetXY(25, $y_cliente);
-            $pdf->Cell(20, 8, utf8_decode('Teléfono:'), 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(40, 8, utf8_decode($cliente_telefono), 0, 1, 'L');
+                return $pdf->GetY(); // nuevo Y tras escribir el valor
+            };
 
-            $y_cliente += 8;
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetXY(25, $y_cliente);
-            $pdf->Cell(20, 8, utf8_decode('Dirección:'), 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(40, 8, utf8_decode($cliente_direccion), 0, 1, 'L');
+            // geometría de los cuadros
+            $x_left_box = 20;  $w_box = 85;  $x_right_box = 110;
+            $inner_pad = 5;   $lineH = 6;
 
-            // Escribir datos de la orden de servicio
-            $y_orden = $y_rect + 5;
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetXY(115, $y_orden);
-            $pdf->Cell(35, 8, utf8_decode('Número de Orden:'), 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(40, 8, 'OS-' . $despacho->id_despacho, 0, 1, 'L');
+            // coordenadas internas
+            $x_left_in = $x_left_box + $inner_pad; // 25
+            $x_right_in = $x_right_box + $inner_pad; // 115
 
-            $y_orden += 8;
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetXY(115, $y_orden);
-            $pdf->Cell(35, 8, 'Fecha de Ingreso:', 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(40, 8, $fecha_entrega, 0, 1, 'L');
+            // anchos etiqueta/valor (izquierda)
+            $labelW_L = 22;
+            $valueW_L = ($x_left_box + $w_box - $inner_pad) - ($x_left_in + $labelW_L); // 100 - (25+22) = 53
 
-            $y_orden += 8;
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetXY(115, $y_orden);
-            $pdf->Cell(35, 8, 'Fecha de Entrega:', 0, 0, 'L');
-            $pdf->SetFont('Arial', '', 10);
-            $pdf->Cell(40, 8, Carbon::parse($despacho->despacho_fecha)->format('d/m/Y'), 0, 1, 'L');
+            // anchos etiqueta/valor (derecha)
+            $labelW_R = 35;
+            $valueW_R = ($x_right_box + $w_box - $inner_pad) - ($x_right_in + $labelW_R); // 190 - (115+35) = 40
 
-            // Mover el cursor debajo de los rectángulos
-            $pdf->SetY($y_rect + 40 + 10);
+            // Y inicial dentro de cada cuadro
+            $y_left  = $y_top + $inner_pad;
+            $y_right = $y_top + $inner_pad;
 
-            // Descripción del servicio (con tabla)
+            // ----- Bloque IZQUIERDO: Cliente -----
+            $y_left = $writeLV($pdf, $x_left_in,  $y_left,  'Nombre:', $cliente_razon_social ?? 'No disponible', $labelW_L, $valueW_L, $lineH);
+            $y_left = $writeLV($pdf, $x_left_in,  $y_left,  'Email:', $cliente_email ?? 'No disponible', $labelW_L, $valueW_L, $lineH);
+            $y_left = $writeLV($pdf, $x_left_in,  $y_left,  'Teléfono:', $cliente_telefono ?? 'No disponible', $labelW_L, $valueW_L, $lineH);
+            $y_left = $writeLV($pdf, $x_left_in,  $y_left,  'Dirección:', $cliente_direccion ?? 'No disponible', $labelW_L, $valueW_L, $lineH);
+
+            // ----- Bloque DERECHO: Orden de servicio -----
+            $y_right = $writeLV($pdf, $x_right_in, $y_right, 'Número de Orden:', $despacho->despacho_nr_orden, $labelW_R, $valueW_R, $lineH);
+            $y_right = $writeLV($pdf, $x_right_in, $y_right, 'Fecha de Ingreso:', $fecha_entrega ?? '-', $labelW_R, $valueW_R, $lineH);
+            $y_right = $writeLV($pdf, $x_right_in, $y_right, 'Fecha de Entrega:', Carbon::parse($despacho->despacho_fecha)->format('d/m/Y'), $labelW_R, $valueW_R, $lineH);
+
+            // Altura necesaria según el lado que más creció
+            $y_bottom = max($y_left, $y_right);
+            $rect_h   = ($y_bottom - $y_top) + $inner_pad; // colchón inferior
+
+            // Dibujar marcos con altura exacta
+            $pdf->RoundedRect($x_left_box,  $y_top, $w_box, $rect_h, 2, 'D');
+            $pdf->RoundedRect($x_right_box, $y_top, $w_box, $rect_h, 2, 'D');
+
+            // Continuar debajo de ambos recuadros
+            $pdf->SetY($y_top + $rect_h + 10);
+
+            // =========================================
+            // Descripción del servicio (tal cual usas)
+            // =========================================
             $pdf->SetFont('Arial', 'B', 9);
             $pdf->SetFillColor(240,240,240);
             $pdf->Cell(20, 10, 'Cantidad', 1, 0, 'C', 1);
@@ -479,18 +587,101 @@ class General extends Model
             $pdf->Cell(47, 10, 'Precio', 1, 1, 'C', 1);
             $pdf->SetWidths([20,107,47]);
 
-            // Mostrar detalles de las guías seleccionadas
             $pdf->SetFont('Arial', '', 9);
             $i = 1;
             foreach ($despacho->despacho_detalle as $detalle) {
-                $guia = DB::table('guias')->where('id_guia', $detalle->id_guia)->first();
+                $guiaRow = DB::table('guias')->where('id_guia', $detalle->id_guia)->first();
                 $pdf->Row([
                     $i,
-                    utf8_decode($guia->guia_trabajo_realizar),
+                    utf8_decode($guiaRow->guia_trabajo_realizar ?? ''),
                     'S/. 0.00',
                 ]);
+                // $i++;
             }
 
+            $pdf->Ln(6);
+
+            // =========================================
+            // Guías incluidas en este despacho
+            // =========================================
+            $pdf->SetFont('Arial', 'BU', 10);
+            $pdf->Cell(174, 8, utf8_decode('Guías incluidas en este despacho'), 0, 1, 'L');
+
+            $pdf->SetFont('Arial', 'B', 9);
+            $pdf->SetFillColor(245,245,245);
+            $pdf->Cell(20, 8, utf8_decode('N°'), 1, 0, 'C', 1);
+            $pdf->Cell(154, 8, utf8_decode('Guía (Serie - Correlativo)'), 1, 1, 'C', 1);
+
+            $pdf->SetFont('Arial', '', 9);
+            $n = 1;
+            foreach ($despacho->despacho_detalle as $detalle) {
+                $g = DB::table('guias')
+                    ->select('guia_serie','guia_correlativo')
+                    ->where('id_guia', $detalle->id_guia)
+                    ->first();
+
+                $codigo = $g ? ($g->guia_serie . '-' . $g->guia_correlativo) : '-';
+                $pdf->Cell(20, 8, (string)$n, 1, 0, 'C');
+                $pdf->Cell(154, 8, utf8_decode($codigo), 1, 1, 'C');
+                $n++;
+            }
+
+            $pdf->Ln(6);
+
+            // =========================================
+            // Materiales por guía
+            // =========================================
+            $pdf->SetFont('Arial', 'BU', 10);
+            $pdf->Cell(174, 8, utf8_decode('Recursos por guía'), 0, 1, 'L');
+
+            foreach ($despacho->despacho_detalle as $detalle) {
+                $g = DB::table('guias')
+                    ->select('guia_serie','guia_correlativo')
+                    ->where('id_guia', $detalle->id_guia)
+                    ->first();
+                $codigo = $g ? ($g->guia_serie . '-' . $g->guia_correlativo) : '-';
+
+                // Subtítulo de la guía
+                $pdf->SetFont('Arial', 'B', 9);
+                $pdf->Cell(0, 7, utf8_decode('Guía: ' . $codigo), 0, 1, 'L');
+
+                // Header materiales
+                $pdf->SetFont('Arial', 'B', 9);
+                $pdf->SetFillColor(245,245,245);
+                $pdf->Cell(20, 8, utf8_decode('Cant.'), 1, 0, 'C', 1);
+                $pdf->Cell(50, 8, utf8_decode('Tipo'), 1, 0, 'C', 1);
+                $pdf->Cell(104, 8, utf8_decode('Recurso'), 1, 1, 'C', 1);
+                $pdf->SetWidths([20,50,104]);
+
+                // materiales de la guía
+                $materiales = DB::table('guias_recursos as gr')
+                    ->join('recursos as r', 'r.id_recurso', '=', 'gr.id_recurso')
+                    ->leftJoin('tipos_recursos as tr', 'tr.id_tipo_recurso', '=', 'r.id_tipo_recurso')
+                    ->select(
+                        'gr.guia_recurso_cantidad',
+                        'r.recurso_nombre',
+                        'tr.tipo_recurso_concepto'
+                    )
+                    ->where('gr.id_guia', $detalle->id_guia)
+                    ->get();
+
+                $pdf->SetFont('Arial', '', 9);
+                if ($materiales->count() === 0) {
+                    $pdf->Cell(190, 8, utf8_decode('Sin materiales registrados.'), 1, 1, 'C');
+                } else {
+                    foreach ($materiales as $m) {
+                        $pdf->Row([
+                            (string)($m->guia_recurso_cantidad ?? 0),
+                            utf8_decode($m->tipo_recurso_concepto ?? '-'),
+                            utf8_decode($m->recurso_nombre ?? '-'),
+                        ]);
+                    }
+                }
+
+                $pdf->Ln(4);
+            }
+
+            // Salida
             if ($tipo === 1) {
                 $pdf->Output();
                 exit;

@@ -33,6 +33,7 @@ class GestionarDespachos extends Component
     public $transportista_id = '';
     public $vehiculo_id = '';
     public $fecha_despacho;
+    public $despacho_nr_orden;
 
     public $guias_seleccionadas = [];
     public $guias_ids_seleccionadas = [];
@@ -179,10 +180,12 @@ class GestionarDespachos extends Component
                 'transportista_id' => 'required|integer',
                 'vehiculo_id' => 'required|integer',
                 'fecha_despacho' => 'required|date',
+                'despacho_nr_orden' => 'required|string',
             ], [
                 'transportista_id.required' => 'Seleccione un transportista.',
                 'vehiculo_id.required' => 'Seleccione un vehículo.',
                 'fecha_despacho.required' => 'Seleccione la fecha de despacho.',
+                'despacho_nr_orden.required' => 'Ingrese un número de orden.',
             ]);
 
             if (count($this->guias_seleccionadas) === 0) {
@@ -197,6 +200,7 @@ class GestionarDespachos extends Component
             $desp->id_transportista = $this->transportista_id;
             $desp->id_vehiculo = $this->vehiculo_id;
             $desp->despacho_fecha = $this->fecha_despacho . ' 00:00:00';
+            $desp->despacho_nr_orden = $this->despacho_nr_orden;
             $desp->despacho_estado = 1;
 
             if (!$desp->save()) {
