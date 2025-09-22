@@ -132,7 +132,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label">Fecha de despacho</label>
+                            <label class="form-label">Fecha</label>
                             <input type="date" class="form-control" wire:model="fecha_despacho">
                             @error('fecha_despacho') <span class="message-error d-block mt-1">{{ $message }}</span> @enderror
                         </div>
