@@ -25,7 +25,9 @@ class Recurso extends Model{
                 ->join('medida as m', 'r.id_medida', 'm.id_medida')
                 ->where(function($q) use ($search) {
                     $q->where('r.recurso_cantidad', 'like', '%' . $search . '%')
-                        ->orWhereNull('r.recurso_cantidad');
+                        ->orWhere('r.recurso_nombre', 'like', '%' . $search . '%')
+                        ->orWhereNull('r.recurso_cantidad')
+                        ->orWhereNull('r.recurso_nombre');
                 })->orderBy('r.id_recurso', $order);
 
             $result = $query->paginate($pagination);

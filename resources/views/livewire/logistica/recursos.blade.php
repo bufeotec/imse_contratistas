@@ -9,13 +9,13 @@
             <form wire:submit.prevent="save_recurso">
                 <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
-                        <label for="recurso_nombre" class="form-label">Nombre (*)</label>
+                        <label for="recurso_nombre" class="form-label">Nombre <b class="text-danger">(*)</b></label>
                         <x-input-general type="text" id="recurso_nombre" wire:model="recurso_nombre" />
                         @error('recurso_nombre')<span class="message-error">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
-                        <label for="id_tipo_recurso" class="form-label">Tipo de Recurso (*)</label>
+                        <label for="id_tipo_recurso" class="form-label">Tipo de Recurso <b class="text-danger">(*)</b></label>
                         <select class="form-select" name="id_tipo_recurso" id="id_tipo_recurso" wire:model="id_tipo_recurso" >
                             <option value="">Seleccionar...</option>
                             @foreach($listar_tipos_recursos as $ltr)
@@ -26,7 +26,7 @@
                     </div>
 
                     <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
-                        <label for="id_medida" class="form-label">Medida (*)</label>
+                        <label for="id_medida" class="form-label">Medida <b class="text-danger">(*)</b></label>
                         <select class="form-select" name="id_medida" id="id_medida" wire:model="id_medida" >
                             <option value="">Seleccionar...</option>
                             @foreach($listar_medidas as $ltr)
@@ -37,13 +37,13 @@
                     </div>
 
                     <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
-                        <label for="recurso_cantidad" class="form-label">Cantidad (*)</label>
+                        <label for="recurso_cantidad" class="form-label">Cantidad <b class="text-danger">(*)</b></label>
                         <x-input-general  type="text" id="recurso_cantidad" wire:model="recurso_cantidad" onkeyup="validar_numeros(this.id)"/>
                         @error('recurso_cantidad')<span class="message-error">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
-                        <label for="recurso_estado" class="form-label">Estado</label>
+                        <label for="recurso_estado" class="form-label">Estado <b class="text-danger">(*)</b></label>
                         <select class="form-control" id="recurso_estado" wire:model="recurso_estado">
                             <option value="">Seleccionar...</option>
                             <option value="1">Activo</option>

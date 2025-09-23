@@ -40,4 +40,43 @@ class Guia extends Model{
         }
         return $result;
     }
+
+    public function obtener_ultimo_correlativo(){
+        try {
+            $ultimaGuia = DB::table('guias')
+                ->whereNotNull('guia_correlativo')
+                ->orderBy('guia_correlativo', 'desc')
+                ->first();
+
+            if ($ultimaGuia && !empty($ultimaGuia->guia_correlativo)) {
+                // Extraer solo la parte numérica del correlativo (removiendo los ceros a la izquierda)
+                $ultimoCorrelativo = (int) $ultimaGuia->guia_correlativo;
+
+                // Incrementar el correlativo y formatear con 4 dígitos
+                $nuevoCorrelativo = str_pad($ultimoCorrelativo + 1, 4, '0', STR_PAD_LEFT);
+            } else {
+                // No hay registros previos: iniciar con el primer correlativo
+                $nuevoCorrelativo = "0001";
+            }
+
+            return $nuevoCorrelativo;
+
+        } catch (\Exception $e) {
+            $this->logs->insertarLog($e);
+            return "0001"; // Valor por defecto en caso de error
+        }
+    }
+
+    public function obtener_guia_por_id($id){
+        try {
+            $result = DB::table('guias')
+                ->where('id_guia','=',$id)
+                ->first();
+
+        }catch (\Exception $e){
+            $this->logs->insertarLog($e);
+            $result = [];
+        }
+        return $result;
+    }
 }

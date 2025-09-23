@@ -153,52 +153,73 @@ class Recursos extends Component{
                     session()->flash('error_modal_agregar', 'No tiene permisos para crear.');
                     return;
                 }
-                $microtime = microtime(true);
-                DB::beginTransaction();
-                $recurso_save = new Recurso();
-                $recurso_save->id_users = Auth::id();
-                $recurso_save->id_tipo_recurso = $this->id_tipo_recurso;
-                $recurso_save->id_medida = $this->id_medida;
-                $recurso_save->recurso_nombre = $this->recurso_nombre;
-                $recurso_save->recurso_cantidad = $this->recurso_cantidad;
-                $recurso_save->recurso_estado_movimiento = 1;
-                $recurso_save->recurso_microtime = $microtime;
-                $recurso_save->recurso_estado = 1;
 
-                if ($recurso_save->save()) {
-                    DB::commit();
-                    $this->dispatch('hide_modal_recurso');
-                    session()->flash('success', 'Registro guardado correctamente.');
+                $validar = DB::table('recursos')
+                    ->where('id_tipo_recurso', '=', $this->id_tipo_recurso)
+                    ->where('recurso_nombre', '=', $this->recurso_nombre)
+                    ->exists();
+
+                if (!$validar) {
+                    $microtime = microtime(true);
+                    DB::beginTransaction();
+                    $recurso_save = new Recurso();
+                    $recurso_save->id_users = Auth::id();
+                    $recurso_save->id_tipo_recurso = $this->id_tipo_recurso;
+                    $recurso_save->id_medida = $this->id_medida;
+                    $recurso_save->recurso_nombre = $this->recurso_nombre;
+                    $recurso_save->recurso_cantidad = $this->recurso_cantidad;
+                    $recurso_save->recurso_estado_movimiento = 1;
+                    $recurso_save->recurso_microtime = $microtime;
+                    $recurso_save->recurso_estado = $this->recurso_estado;
+
+                    if ($recurso_save->save()) {
+                        DB::commit();
+                        $this->dispatch('hide_modal_recurso');
+                        session()->flash('success', 'Registro guardado correctamente.');
+                    } else {
+                        DB::rollBack();
+                        session()->flash('error_modal_agregar', 'Ocurrió un error al guardar el recurso.');
+                        return;
+                    }
                 } else {
-                    DB::rollBack();
-                    session()->flash('error_modal_agregar', 'Ocurrió un error al guardar el recurso.');
+                    session()->flash('error_modal_agregar', 'Ya existe un recurso con ese nombre para el tipo seleccionado.');
                     return;
                 }
-
             } else { // UPDATE
                 if (!Gate::allows('update_recurso')) {
                     session()->flash('error_modal_agregar', 'No tiene permisos para actualizar este registro.');
                     return;
                 }
 
-                DB::beginTransaction();
-                // Actualizar los datos del vehículo
-                $recurso_update = Recurso::findOrFail($this->id_recurso);
-                $recurso_update->id_tipo_recurso = $this->id_tipo_recurso;
-                $recurso_update->id_medida = $this->id_medida;
-                $recurso_update->recurso_nombre = $this->recurso_nombre;
-                $recurso_update->recurso_cantidad = $this->recurso_cantidad;
-                $recurso_update->recurso_estado = $this->recurso_estado;
+                $validar_update = DB::table('recursos')
+                    ->where('id_recurso', '<>', $this->id_recurso)
+                    ->where('id_tipo_recurso', '=', $this->id_tipo_recurso)
+                    ->where('recurso_nombre', '=', $this->recurso_nombre)
+                    ->exists();
 
-                // Guardar cambios en el vehículo
-                if (!$recurso_update->save()) {
-                    DB::rollBack();
-                    session()->flash('error_modal_agregar', 'No se pudo actualizar el registro del recurso.');
+                if (!$validar_update) {
+                    DB::beginTransaction();
+                    // Actualizar los datos del vehículo
+                    $recurso_update = Recurso::findOrFail($this->id_recurso);
+                    $recurso_update->id_tipo_recurso = $this->id_tipo_recurso;
+                    $recurso_update->id_medida = $this->id_medida;
+                    $recurso_update->recurso_nombre = $this->recurso_nombre;
+                    $recurso_update->recurso_cantidad = $this->recurso_cantidad;
+                    $recurso_update->recurso_estado = $this->recurso_estado;
+
+                    // Guardar cambios en el vehículo
+                    if (!$recurso_update->save()) {
+                        DB::rollBack();
+                        session()->flash('error_modal_agregar', 'No se pudo actualizar el registro del recurso.');
+                        return;
+                    }
+                    DB::commit();
+                    $this->dispatch('hide_modal_recurso');
+                    session()->flash('success', 'Registro actualizado correctamente.');
+                } else {
+                    session()->flash('error_modal_agregar', 'Ya existe un recurso con ese nombre para el tipo seleccionado.');
                     return;
                 }
-                DB::commit();
-                $this->dispatch('hide_modal_recurso');
-                session()->flash('success', 'Registro actualizado correctamente.');
             }
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->setErrorBag($e->validator->errors());

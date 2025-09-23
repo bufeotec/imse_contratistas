@@ -1,6 +1,10 @@
 <div>
 
-{{--    MODAL REGISTRAR DOCUMENTO--}}
+    @php
+        $general = new \App\Models\General();
+    @endphp
+
+    {{-- MODAL REGISTRAR DOCUMENTO--}}
     <x-modal-general wire:ignore.self >
         <x-slot name="id_modal">modal_registrar_documento</x-slot>
         <x-slot name="tama">modal-xl</x-slot>
@@ -16,7 +20,9 @@
                             </div>
                         @endif
                     </div>
+
                     <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <!-- CLIENTE -->
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                                 <small class="text-primary">Información del Cliente</small>
@@ -25,9 +31,9 @@
 
                             <div class="col-6 col-md-6 col-sm-12 mb-3">
                                 <x-input-general type="hidden" id="id_cliente" wire:model="id_cliente" />
-                                <label for="id_tipo_documento" class="form-label">Tipo de documento (*)</label>
+                                <label for="id_tipo_documento" class="form-label">Tipo de documento <b class="text-danger">(*)</b></label>
                                 <select
-                                    @if(!$mostrar) disabled @endif
+{{--                                    @if(!$mostrar) disabled @endif--}}
                                 id="id_tipo_documento" wire:model="id_tipo_documento" class="form-select">
                                     <option value="">Seleccionar</option>
                                     @foreach($listar_tipo_doc as $ltd)
@@ -37,8 +43,8 @@
                                 @error('id_tipo_documento')<span class="message-error">{{ $message }}</span>@enderror
                             </div>
 
-                            <div class="col-12 col-md-12 col-sm-12 mb-3">
-                                <label for="cliente_numero_documento" class="form-label">Número de documento (*)</label>
+                            <div class="col-6 col-md-6 col-sm-12 mb-3">
+                                <label for="cliente_numero_documento" class="form-label">Número de documento <b class="text-danger">(*)</b></label>
                                 <x-input-general type="text" id="cliente_numero_documento" wire:change="consultarDocumento" wire:model="cliente_numero_documento"/>
                                 @error('cliente_numero_documento')
                                 <span class="message-error">{{ $message }}</span>
@@ -51,80 +57,131 @@
                                 @endif
                             </div>
 
-                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                <label for="cliente_razon_social" class="form-label">Razón Social (*)</label>
-                                <x-input-general :readonly="!$mostrar" type="text" id="cliente_razon_social" wire:model="cliente_razon_social" />
-                                @error('cliente_razon_social')
-                                <span class="message-error">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                <label for="cliente_nombre_comercial" class="form-label">Nombre Comercial (*)</label>
-                                <x-input-general  type="text" id="cliente_nombre_comercial" wire:model="cliente_nombre_comercial" />
-                                @error('cliente_nombre_comercial')
-                                <span class="message-error">{{ $message }}</span>
-                                @enderror
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                                <label for="cliente_razon_social" class="form-label">Razón Social <b class="text-danger">(*)</b></label>
+                                <x-input-general type="text" id="cliente_razon_social" wire:model="cliente_razon_social" />
+                                @error('cliente_razon_social')<span class="message-error">{{ $message }}</span>@enderror
                             </div>
 
                             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <label for="cliente_telefono" class="form-label">Celular (*)</label>
+                                <label for="cliente_nombre_comercial" class="form-label">Nombre Comercial <b class="text-danger">(*)</b></label>
+                                <x-input-general  type="text" id="cliente_nombre_comercial" wire:model="cliente_nombre_comercial" />
+                                @error('cliente_nombre_comercial')<span class="message-error">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                                <label for="cliente_telefono" class="form-label">Celular</label>
                                 <x-input-general  type="text" id="cliente_telefono" wire:model="cliente_telefono" onkeyup="validar_numeros(this.id)" />
-                                @error('cliente_telefono')
-                                <span class="message-error">{{ $message }}</span>
-                                @enderror
+                                @error('cliente_telefono')<span class="message-error">{{ $message }}</span>@enderror
                             </div>
 
                             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                                 <label for="cliente_email" class="form-label">Email</label>
                                 <x-input-general  type="text" id="cliente_email" wire:model="cliente_email" />
-                                @error('cliente_email')
-                                <span class="message-error">{{ $message }}</span>
-                                @enderror
+                                @error('cliente_email')<span class="message-error">{{ $message }}</span>@enderror
                             </div>
 
                             <div class="col-lg-12 col-md-12 col-sm-12 mb-4">
-                                <label for="cliente_direccion" class="form-label">Dirección (*)</label>
-                                <textarea id="cliente_direccion" name="cliente_direccion" rows="3" wire:model="cliente_direccion" class="form-control"></textarea>
-                                @error('cliente_direccion')
-                                <span class="message-error">{{ $message }}</span>
-                                @enderror
+                                <label for="cliente_direccion" class="form-label">Dirección <b class="text-danger">(*)</b></label>
+                                <textarea id="cliente_direccion" name="cliente_direccion" rows="2" wire:model="cliente_direccion" class="form-control"></textarea>
+                                @error('cliente_direccion')<span class="message-error">{{ $message }}</span>@enderror
+                            </div>
+                        </div>
+
+                        <!-- PERSONALES -->
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+                                <small class="text-primary">Información Personal</small>
+                                <hr class="mb-0">
                             </div>
 
+                            <div class="col-lg-9 col-md-9 col-sm-12 mb-3">
+                                <label class="form-label">Personal</label>
+                                <select class="form-control" wire:model="personal_seleccionado">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach($listar_personales_activos as $lpv)
+                                        <option value="{{$lpv->id_personal}}">{{$lpv->personal_nombre}} {{$lpv->personal_apellido}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12 mb-3 mt-4">
+                                <a class="btn btn-sm bg-info text-white" wire:click="agregar_personal">
+                                    <i class="fa-solid fa-plus"></i>
+                                </a>
+                            </div>
+
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <div class="loader mt-2 w-100" wire:loading wire:target="agregar_personal, eliminar_personal"></div>
+                            </div>
+
+                            {{-- Mostrar mensajes de éxito o error --}}
+                            @if (session()->has('success_agregar_personal'))
+                                <div class="alert alert-success alert-dismissible show fade">
+                                    {{ session('success_agregar_personal') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+                            @if (session()->has('error_eliminar_personal'))
+                                <div class="alert alert-danger alert-dismissible show fade">
+                                    {{ session('error_eliminar_personal') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+
+                            @if(count($personales_seleccionados) > 0)
+                                <div class="col-lg-12 col-md-2 col-sm-12 mb-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover">
+                                            <thead class="table-dark">
+                                            <tr>
+                                                <th>N°</th>
+                                                <th>Nombre</th>
+                                                <th>Apellido</th>
+                                                <th>Correo</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @php $c_p = 1; @endphp
+                                            @foreach($personales_seleccionados as $personal)
+                                                <tr>
+                                                    <td>{{$c_p}}</td>
+                                                    <td>{{ $personal['personal_nombre'] }}</td>
+                                                    <td>{{ $personal['personal_apellido'] }}</td>
+                                                    <td>{{ $personal['personal_gmail'] }}</td>
+                                                    <td>
+                                                        <a class="btn btn-sm btn-danger text-white"
+                                                           wire:click="eliminar_personal({{ $personal['id_personal'] }})">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                @php $c_p++; @endphp
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
+
                     <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <!-- GUÍA -->
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                                 <small class="text-primary">Información de la guia</small>
                                 <hr class="mb-0">
                             </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <label for="guia_serie" class="form-label">Serie (*)</label>
-                                <x-input-general type="text" id="guia_serie" wire:model="guia_serie"/>
-                                @error('guia_serie')<span class="message-error">{{ $message }}</span>@enderror
-                            </div>
 
                             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <label for="guia_correlativo" class="form-label">Correlativo (*)</label>
-                                <x-input-general type="text" id="guia_correlativo" wire:model="guia_correlativo" />
-                                @error('guia_correlativo')<span class="message-error">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <label for="guia_fecha_emision" class="form-label">Fecha de Emisión (*)</label>
+                                <label for="guia_fecha_emision" class="form-label">Fecha de Emisión <b class="text-danger">(*)</b></label>
                                 <x-input-general type="date" id="guia_fecha_emision" wire:model="guia_fecha_emision" />
                                 @error('guia_fecha_emision')<span class="message-error">{{ $message }}</span>@enderror
                             </div>
 
                             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <label for="guia_trabajo_realizar" class="form-label">Trabajo a realizar (*)</label>
-                                <textarea class="form-control" rows="2" id="guia_trabajo_realizar" wire:model="guia_trabajo_realizar"></textarea>
-                                @error('guia_trabajo_realizar')<span class="message-error">{{ $message }}</span>@enderror
-                            </div>
-
-                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <label for="guia_modalidad_transporte" class="form-label">Modalidad de Transporte (*)</label>
+                                <label for="guia_modalidad_transporte" class="form-label">Modalidad de Transporte <b class="text-danger">(*)</b></label>
                                 <select class="form-control" id="guia_modalidad_transporte" wire:model="guia_modalidad_transporte">
                                     <option value="">Seleccionar...</option>
                                     <option value="1">Publico</option>
@@ -133,141 +190,48 @@
                                 @error('guia_modalidad_transporte')<span class="message-error">{{ $message }}</span>@enderror
                             </div>
 
-                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <label for="guia_documento" class="form-label">Documento (*)</label>
-                                <x-input-general type="file" id="guia_documento" wire:model="guia_documento"/>
-                                @error('guia_documento')<span class="message-error">{{ $message }}</span>@enderror
+                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+                                <label for="guia_trabajo_realizar" class="form-label">Trabajo a realizar <b class="text-danger">(*)</b></label>
+                                <textarea class="form-control" rows="2" id="guia_trabajo_realizar" wire:model="guia_trabajo_realizar"></textarea>
+                                @error('guia_trabajo_realizar')<span class="message-error">{{ $message }}</span>@enderror
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-lg-12 col-md-12 col-sm-12 mt-3 text-end">
-                        <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Cerrar</button>
-                        <button type="submit" class="btn btn-success text-white">Guardar Registro</button>
-                    </div>
-                </div>
-            </form>
-        </x-slot>
-    </x-modal-general>
-{{--    FIN MODAL REGISTRAR DOCUMENTO--}}
-
-{{--    MODAL REGISTRAR PERSONAL / RECURSO--}}
-    <x-modal-general wire:ignore.self >
-        <x-slot name="id_modal">modal_registrar_personal_recurso</x-slot>
-        <x-slot name="tama">modal-xl</x-slot>
-        <x-slot name="titleModal">Gestionar Personal / Recurso</x-slot>
-        <x-slot name="modalContent">
-            <form wire:submit.prevent="save_personal_recurso">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                        @if (session()->has('error_modal_personal_recurso'))
-                            <div class="alert alert-danger alert-dismissible show fade">
-                                {{ session('error_modal_personal_recurso') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- PERSONALES -->
-                    <div class="col-lg-5">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="row">
-                                    <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                        <small class="text-primary">Información Personal</small>
-                                        <hr class="mb-0">
-                                    </div>
-
-                                    <div class="col-lg-9 col-md-9 col-sm-12 mb-3">
-                                        <label class="form-label">Personal</label>
-                                        <select class="form-control" wire:model="personal_seleccionado">
-                                            <option value="">Seleccionar...</option>
-                                            @foreach($listar_personales_activos as $lpv)
-                                                <option value="{{$lpv->id_personal}}">{{$lpv->personal_nombre}} {{$lpv->personal_apellido}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-lg-2 col-md-2 col-sm-12 mb-3 mt-4">
-                                        <a class="btn btn-sm bg-info text-white" wire:click="agregar_personal">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </a>
-                                    </div>
-
-                                    {{-- Mostrar mensajes de éxito o error --}}
-                                    @if (session()->has('success_agregar_personal'))
-                                        <div class="alert alert-success alert-dismissible show fade">
-                                            {{ session('success_agregar_personal') }}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                    @endif
-                                    @if (session()->has('error_eliminar_personal'))
-                                        <div class="alert alert-danger alert-dismissible show fade">
-                                            {{ session('error_eliminar_personal') }}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                    @endif
-
-                                    @if(count($personales_seleccionados) > 0)
-                                        <div class="col-lg-12 col-md-2 col-sm-12 mb-3">
-                                            <div class="table-responsive">
-                                                <table class="table table-striped table-hover">
-                                                    <thead class="table-dark">
-                                                    <tr>
-                                                        <th>N°</th>
-                                                        <th>Nombre</th>
-                                                        <th>Apellido</th>
-                                                        <th>Correo</th>
-                                                        <th>Acciones</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @php $c_p = 1; @endphp
-                                                    @foreach($personales_seleccionados as $personal)
-                                                        <tr>
-                                                            <td>{{$c_p}}</td>
-                                                            <td>{{ $personal['personal_nombre'] }}</td>
-                                                            <td>{{ $personal['personal_apellido'] }}</td>
-                                                            <td>{{ $personal['personal_gmail'] }}</td>
-                                                            <td>
-                                                                <a class="btn btn-sm btn-danger text-white"
-                                                                        wire:click="eliminar_personal({{ $personal['id_personal'] }})">
-                                                                    <i class="fa-solid fa-trash"></i>
-                                                                </a>
-                                                            </td>
-                                                        </tr>
-                                                        @php $c_p++; @endphp
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RECURSO -->
-                    <div class="col-lg-7">
+                        <!-- RECURSO -->
                         <div class="row">
                             <div class="col-lg-12 col-md-12 -col-sm-12 mb-3">
                                 <small class="text-primary">Información Recurso</small>
                                 <hr class="mb-0">
                             </div>
 
-                            <div class="col-lg-9 col-md-9 col-sm-12 mb-3">
+                            <div class="col-lg-9 col-md-9 col-sm-12 mb-3 position-relative">
                                 <label class="form-label">Recursos</label>
-                                <select class="form-control" wire:model="recurso_seleccionado">
-                                    <option>Seleccionar...</option>
-                                    @foreach($listar_recursos_activos as $lra)
-                                        <option value="{{$lra->id_recurso}}"> {{$lra->recurso_nombre}} </option>
-                                    @endforeach
-                                </select>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Buscar"
+                                       wire:model="buscar_recurso_search"
+                                       wire:keyup="buscar_recurso_filtro()">
+                                @if($abrir_lista_recurso)
+                                    <div style="width: 120%; z-index: 999" class="position-absolute top-100 start-0 mt-1 z-10" id="lista_cliente_reporte">
+                                        <div class="list-group bg-white shadow-sm">
+                                            @foreach($lista_recurso_filtro as $l)
+                                                <a style="cursor: pointer" class="list-group-item list-group-item-action"
+                                                   wire:click="seleccionar_recurso_vista('{{base64_encode($l->id_recurso)}}')">
+                                                    {{ $l->recurso_nombre }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                             <div class="col-lg-3 col-md-3 col-sm-12 mb-3 mt-4">
                                 <a class="btn btn-sm bg-primary text-white" wire:click="agregar_recurso">
                                     <i class="fa-solid fa-plus"></i>
                                 </a>
+                            </div>
+
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <div class="loader mt-2 w-100" wire:loading wire:target="agregar_recurso, eliminar_recurso, buscar_recurso_filtro, seleccionar_recurso_vista"></div>
                             </div>
 
                             <div class="col-lg-12 mb-3">
@@ -331,7 +295,7 @@
                                                     </td>
                                                     <td>
                                                         <a class="btn btn-sm btn-danger text-white"
-                                                                wire:click="eliminar_recurso({{ $recurso['id_recurso'] }})">
+                                                           wire:click="eliminar_recurso({{ $recurso['id_recurso'] }})">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </a>
                                                     </td>
@@ -354,7 +318,197 @@
             </form>
         </x-slot>
     </x-modal-general>
-{{--    FIN MODAL REGISTRAR PERSONAL / RECURSO--}}
+    {{-- FIN MODAL REGISTRAR DOCUMENTO--}}
+
+    {{-- MODAL INFORMACIÓN GUÍA--}}
+    <x-modal-general wire:ignore.self >
+        <x-slot name="id_modal">modal_info_guia</x-slot>
+        <x-slot name="tama">modal-xl</x-slot>
+        <x-slot name="titleModal">Información de la Guía</x-slot>
+        <x-slot name="modalContent">
+            @if($listar_info_guia)
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <h6>Datos generales</h6>
+                                <hr>
+                            </div>
+
+                            <div class="col-lg-3 col-md-3 col-sm-4 mb-3">
+                                <strong class="color_imse mb-2">Trabajo a Realizar</strong>
+                                <p>{{ $listar_info_guia->guia_trabajo_realizar }}</p>
+                            </div>
+
+                            <div class="col-lg-2 col-md-3 col-sm-4 mb-3">
+                                <strong class="color_imse mb-2">Serie - Correlativo</strong>
+                                <p>{{ $listar_info_guia->guia_serie }} - {{ $listar_info_guia->guia_correlativo }}</p>
+                            </div>
+
+                            <div class="col-lg-2 col-md-3 col-sm-4 mb-3">
+                                <strong class="color_imse mb-2">Fecha de Emisión</strong>
+                                <p>{{ $listar_info_guia->guia_fecha_emision ? $general->obtenerNombreFecha($listar_info_guia->guia_fecha_emision, 'Date', 'Date') : '-' }}</p>
+                            </div>
+
+                            <div class="col-lg-3 col-md-3 col-sm-4 mb-3">
+                                @php
+                                $i_modalidad = "";
+                                if ($listar_info_guia->guia_modalidad_transporte == 1){
+                                    $i_modalidad = "Publico";
+                                } elseif ($listar_info_guia->guia_modalidad_transporte == 2){
+                                    $i_modalidad = "Privado";
+                                } else {
+                                    $i_modalidad = "-";
+                                }
+                                @endphp
+                                <strong class="color_imse mb-2">Modalidad de Transporte</strong>
+                                <p>{{ $i_modalidad }}</p>
+                            </div>
+
+                            <div class="col-lg-12 col-md-12 col-sm-12">
+                                <h6>Datos del Cliente</h6>
+                                <hr>
+                            </div>
+
+                            <div class="col-lg-3 col-md-3 col-sm-4 mb-3">
+                                <strong class="color_imse mb-2">Nombre del Cliente</strong>
+                                <p>{{ $listar_info_guia->cliente_razon_social }}</p>
+                            </div>
+
+                            <div class="col-lg-2 col-md-3 col-sm-4 mb-3">
+                                <strong class="color_imse mb-2">RUC / DNI</strong>
+                                <p>{{ $listar_info_guia->cliente_numero_documento }}</p>
+                            </div>
+
+                            <div class="col-lg-3 col-md-3 col-sm-4 mb-3">
+                                <strong class="color_imse mb-2">Dirección</strong>
+                                <p>{{ $listar_info_guia->cliente_direccion }}</p>
+                            </div>
+
+                            @if(!empty($listar_info_guia->cliente_telefono))
+                                <div class="col-lg-2 col-md-3 col-sm-4 mb-3">
+                                    <strong class="color_imse mb-2">Teléfono</strong>
+                                    <p>{{ $listar_info_guia->cliente_telefono }}</p>
+                                </div>
+                            @endif
+
+                           @if(!empty($listar_info_guia->cliente_email))
+                                <div class="col-lg-2 col-md-3 col-sm-4 mb-3">
+                                    <strong class="color_imse mb-2">Correo</strong>
+                                    <p>{{ $listar_info_guia->cliente_email }}</p>
+                                </div>
+                           @endif
+                        </div>
+
+                        <div class="row">
+                            <!-- RECURSOS -->
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                                @if($listar_recursos && $listar_recursos->count())
+                                    <h6>Recursos</h6>
+                                    <hr>
+                                    <x-table-general>
+                                        <x-slot name="thead">
+                                            <tr>
+                                                <th>N°</th>
+                                                <th>Recurso</th>
+                                                <th>Tipo Recurso</th>
+                                                <th>Medida</th>
+                                                <th>Cantidad</th>
+                                            </tr>
+                                        </x-slot>
+                                        <x-slot name="tbody">
+                                            @php $conreo_r = 1; @endphp
+                                            @foreach($listar_recursos as $lr)
+                                                <tr>
+                                                    <td>{{ $conreo_r }}</td>
+                                                    <td>{{ $lr->recurso_nombre }}</td>
+                                                    <td>{{ $lr->tipo_recurso_concepto }}</td>
+                                                    <td>{{ $lr->medida_nombre }}</td>
+                                                    <td>{{ $lr->guia_recurso_cantidad }}</td>
+                                                </tr>
+                                                @php $conreo_r++; @endphp
+                                            @endforeach
+                                        </x-slot>
+                                    </x-table-general>
+                                @else
+                                    <p class="text-muted mt-4 ms-2">No hay recursos registrados para esta guía.</p>
+                                @endif
+                            </div>
+
+                            <!-- PERSONALES -->
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                                @if($listar_personales && $listar_personales->count())
+                                    <h6>Personales</h6>
+                                    <hr>
+                                    <x-table-general>
+                                        <x-slot name="thead">
+                                            <tr>
+                                                <th>N°</th>
+                                                <th>Nombre</th>
+                                                <th>Apellidos</th>
+                                                <th>Correo</th>
+                                                <th>Teléfono</th>
+                                            </tr>
+                                        </x-slot>
+                                        <x-slot name="tbody">
+                                            @php $conreo_p = 1; @endphp
+                                            @foreach($listar_personales as $lp)
+                                                <tr>
+                                                    <td>{{ $conreo_p }}</td>
+                                                    <td>{{ $lp->personal_nombre }}</td>
+                                                    <td>{{ $lp->personal_apellido }}</td>
+                                                    <td>{{ $lp->personal_gmail }}</td>
+                                                    <td>{{ $lp->personal_telefono }}</td>
+                                                </tr>
+                                                @php $conreo_p++; @endphp
+                                            @endforeach
+                                        </x-slot>
+                                    </x-table-general>
+                                @else
+                                    <p class="text-muted mt-4 ms-2">No hay personales registrados para esta guía.</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 mt-3 text-end">
+                        <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Cerrar</button>
+                    </div>
+                </div>
+            @endif
+
+        </x-slot>
+    </x-modal-general>
+    {{-- FIN MODAL INFORMACIÓN GUÍA--}}
+
+    {{-- MODAL PASAR A PROGRAMAR DESPACHO--}}
+    <x-modal-delete wire:ignore.self>
+        <x-slot name="id_modal">modal_registrar_personal_recurso</x-slot>
+        <x-slot name="modalContentDelete">
+            <form wire:submit.prevent="guia_pasar_programar_despacho">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <h2 class="deleteTitle">¿Confirmas pasar la guía a Programación de despacho?</h2>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        @error('id_guia') <span class="message-error">{{ $message }}</span> @enderror
+
+                        @if (session()->has('error_delete'))
+                            <div class="alert alert-danger alert-dismissible show fade">
+                                {{ session('error_delete') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 mt-3 text-center">
+                        <button type="submit" class="btn btn-primary text-white btnDelete">SI</button>
+                        <button type="button" data-bs-dismiss="modal" class="btn btn-danger btnDelete">No</button>
+                    </div>
+                </div>
+            </form>
+        </x-slot>
+    </x-modal-delete>
+    {{-- FIN MODAL PASAR A PROGRAMAR DESPACHO--}}
 
     <div class="row">
         <div class="col-lg-6 col-md-6 col-sm-12  mb-2 ">
@@ -369,7 +523,7 @@
                 <x-slot name="icons">
                     fa-solid fa-plus
                 </x-slot>
-                Agregar Registrar Documento
+                Crear Documento
             </x-btn-export>
         </div>
     </div>
@@ -400,7 +554,6 @@
                                 <th>Fecha Emisión</th>
                                 <th>Trabajo a Realizar</th>
                                 <th>Modalidad Transporte</th>
-                                <th>Documento</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -429,21 +582,23 @@
                                             {{$modalidad}}
                                         </td>
                                         <td>
-                                            @if(!empty($lv->guia_documento))
-                                                <a href="{{ asset($lv->guia_documento) }}" target="_blank">
-                                                    Ver documento
-                                                </a>
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                        <td>
                                             <span class="font-bold badge {{$lv->guia_estado == 1 ? 'bg-label-success ' : 'bg-label-danger'}}">
                                                 {{$lv->guia_estado == 1 ? 'Habilitado ' : 'Desabilitado'}}
                                             </span>
                                         </td>
                                         <td>
-                                            <a class="btn btn-sm bg-primary text-white" wire:click="btn_modal_registrar('{{ base64_encode($lv->id_guia) }}')" data-bs-toggle="modal" data-bs-target="#modal_registrar_personal_recurso">
+                                            <!-- BTN DE INFORMACIÓN DE LA GUÍA -->
+                                            <a class="btn btn-sm bg-info text-white my-1 ms-2" wire:click="btn_info_guia('{{ base64_encode($lv->id_guia) }}')" data-bs-toggle="modal" data-bs-target="#modal_info_guia">
+                                                <i class="fa-solid fa-circle-info"></i>
+                                            </a>
+
+                                            <!-- BTN DESCARGAR LA GUÍA -->
+                                            <a href="{{route('generar_pdf',['id_guia'=>base64_encode($lv->id_guia)])}}" target="_blank" class="btn btn-sm bg-danger text-white my-1 ms-2" >
+                                                <i class="fa-solid fa-download"></i>
+                                            </a>
+
+                                            <!-- BTN CONFIRMAR SERVICIO -->
+                                            <a class="btn btn-sm bg-primary text-white my-1 ms-2" wire:click="btn_modal_registrar('{{ base64_encode($lv->id_guia) }}')" data-bs-toggle="modal" data-bs-target="#modal_registrar_personal_recurso">
                                                 <i class="fa-solid fa-check"></i>
                                             </a>
                                         </td>

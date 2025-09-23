@@ -77,4 +77,6 @@ Route::prefix('Despachos')->middleware('auth')->group(function () {
 // CONTROL DOCUMENTARIO
 Route::prefix('Controldocumentario')->middleware('auth')->group(function () {
     route::get('/registrardocumentos',[ControldocumentarioController::class ,'registrardocumentos'])->name('Controldocumentario.registrardocumentos')->middleware('verifyUserStatus')->middleware('can:registrardocumentos');
+
+    route::get('/generar_pdf', [ControldocumentarioController::class, 'generar_pdf'])->name('generar_pdf');
 });

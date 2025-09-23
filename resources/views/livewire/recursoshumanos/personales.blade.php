@@ -9,31 +9,31 @@
                     <x-input-general type="hidden" id="id_personal" wire:model="id_personal" />
 
                     <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                        <label for="personal_nombre" class="form-label">Nombres (*)</label>
+                        <label for="personal_nombre" class="form-label">Nombres <b class="text-danger">(*)</b></label>
                         <x-input-general type="text" id="personal_nombre" wire:model="personal_nombre" />
                         @error('personal_nombre')<span class="message-error">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                        <label for="personal_apellido" class="form-label">Apellidos (*)</label>
+                        <label for="personal_apellido" class="form-label">Apellidos <b class="text-danger">(*)</b></label>
                         <x-input-general type="text" id="personal_apellido" wire:model="personal_apellido" />
                         @error('personal_apellido')<span class="message-error">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                        <label for="personal_gmail" class="form-label">Email (*)</label>
+                        <label for="personal_gmail" class="form-label">Email <b class="text-danger">(*)</b></label>
                         <x-input-general type="text" id="personal_gmail" wire:model="personal_gmail" />
                         @error('personal_gmail')<span class="message-error">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                        <label for="personal_telefono" class="form-label">Celular (*)</label>
+                        <label for="personal_telefono" class="form-label">Celular <b class="text-danger">(*)</b></label>
                         <x-input-general type="text" id="personal_telefono" wire:model="personal_telefono" onkeyup="validar_numeros(this.id)" />
                         @error('personal_telefono')<span class="message-error">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                        <label for="personal_direccion" class="form-label">Dirección (*)</label>
+                        <label for="personal_direccion" class="form-label">Dirección <b class="text-danger">(*)</b></label>
                         <textarea id="personal_direccion" rows="3" class="form-control" wire:model="personal_direccion"></textarea>
                         @error('personal_direccion')<span class="message-error">{{ $message }}</span>@enderror
                     </div>

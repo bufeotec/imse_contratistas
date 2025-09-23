@@ -181,6 +181,10 @@
 ;
 }
 
+.color_imse{
+    color: #e51821;
+}
+
 @keyframes moving {
     50% {
         width: 100%;
