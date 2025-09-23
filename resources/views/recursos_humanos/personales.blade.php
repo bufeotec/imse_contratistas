@@ -1,5 +1,5 @@
 @extends('layouts.intranet.template')
-@section('title','Personales')
+@section('title','Personal')
 @section('content')
 
 
