@@ -26,6 +26,17 @@ class ControldocumentarioController extends Controller{
         }
     }
 
+    public function sincerar_documentos(){
+        try {
+
+
+            return view('controldocumentario.sincerar_documentos');
+        }catch (\Exception $e){
+            $this->logs->insertarLog($e);
+            return redirect()->route('intranet')->with('error', 'Ocurrió un error al intentar mostrar el contenido.');
+        }
+    }
+
     public function generar_pdf(Request $request){
         // Obtener el parámetro desde la ruta o query
         $encoded = $request->route('id_guia') ?? $request->input('id_guia');
