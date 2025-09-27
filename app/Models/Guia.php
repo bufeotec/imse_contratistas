@@ -69,9 +69,29 @@ class Guia extends Model{
 
     public function obtener_guia_por_id($id){
         try {
-            $result = DB::table('guias')
-                ->where('id_guia','=',$id)
+            $result = DB::table('guias as g')
+                ->join('clientes as c', 'g.id_cliente', 'c.id_cliente')
+                ->where('g.id_guia','=',$id)
                 ->first();
+
+        }catch (\Exception $e){
+            $this->logs->insertarLog($e);
+            $result = [];
+        }
+        return $result;
+    }
+
+    public function obtener_informacion_recurso($id){
+        try {
+            $result = DB::table('guias_recursos as gr')
+                ->join('recursos as r', 'gr.id_recurso', '=', 'r.id_recurso')
+                ->join('tipos_recursos as tr', 'r.id_tipo_recurso', '=', 'tr.id_tipo_recurso')
+                ->join('medida as m', 'r.id_medida', '=', 'm.id_medida')
+                ->where('gr.id_guia', '=', $id)
+                ->where('r.recurso_estado', '=', 1)
+                ->where('tr.tipo_recurso_estado', '=', 1)
+                ->where('gr.guia_recurso_estado', '=', 1)
+                ->get();
 
         }catch (\Exception $e){
             $this->logs->insertarLog($e);
