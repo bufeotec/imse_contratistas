@@ -22,6 +22,10 @@ class HistorialGuias extends Component
     public $fecha_hasta = null;
     public $pagination_guias = 10;
 
+    public $listar_info_guia = [];
+    public $listar_recursos = [];
+    public $listar_personales = [];
+
     public function __construct()
     {
         $this->logs = new Logs();
@@ -80,5 +84,35 @@ class HistorialGuias extends Component
             $guias = new LengthAwarePaginator([], 0, $this->pagination_guias);
             return view('livewire.reportes.historial-guias', compact('guias'));
         }
+    }
+
+    public function btn_info_guia($id_guia){
+
+        $id = base64_decode($id_guia);
+
+        $this->listar_info_guia = DB::table('guias as g')
+            ->join('clientes as c', 'g.id_cliente', 'c.id_cliente')
+            ->where('g.id_guia', '=', $id)
+            ->where('c.cliente_estado', '=', 1)
+            ->first();
+
+        // Recursos de la guía
+        $this->listar_recursos = DB::table('guias_recursos as gr')
+            ->join('recursos as r', 'gr.id_recurso', '=', 'r.id_recurso')
+            ->join('tipos_recursos as tr', 'r.id_tipo_recurso', '=', 'tr.id_tipo_recurso')
+            ->join('medida as m', 'r.id_medida', '=', 'm.id_medida')
+            ->where('gr.id_guia', '=', $id)
+            ->where('r.recurso_estado', '=', 1)
+            ->where('tr.tipo_recurso_estado', '=', 1)
+            ->where('gr.guia_recurso_estado', '=', 1)
+            ->get();
+
+        // Personales de la guía
+        $this->listar_personales = DB::table('guias_personas as gp')
+            ->join('personales as p', 'gp.id_personal', 'p.id_personal')
+            ->where('gp.id_guia', '=', $id)
+            ->where('p.personal_estado', '=', 1)
+            ->where('gp.guia_persona_estado', '=', 1)
+            ->get();
     }
 }

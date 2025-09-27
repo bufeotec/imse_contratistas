@@ -88,7 +88,7 @@
 
                         {{-- acordeón recursos --}}
                         @if(!empty($expanded[$g->id_guia]))
-                            <tr class="child-row" wire:key="gc-{{ $g->id_guia }}">
+                            <tr class="child-row" wire:key="gc-{{ $g->id_guia }}" style="background-color: #9aa5b3; color: white">
                                 <td colspan="5">
                                     <div class="child-box">
                                         @php
@@ -102,14 +102,14 @@
                                                 <table class="table table-sm align-middle mb-0">
                                                     <thead class="table-light">
                                                     <tr class="text-center align-middle">
-                                                        <th style="width:177px">N°</th>
-                                                        <th class="text-center">Recurso</th>
-                                                        <th style="width:120px">Seleccionar</th>
+                                                        <th style="width:177px; background-color: #9aa5b3; color: white">N°</th>
+                                                        <th class="text-center" style="background-color: #9aa5b3; color: white">Recurso</th>
+                                                        <th style="width:120px; background-color: #9aa5b3; color: white">Seleccionar</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
                                                     @foreach($recursos as $idx => $r)
-                                                        <tr class="text-center align-middle" wire:key="r-{{ $g->id_guia }}-{{ $r['id_recurso'] }}">
+                                                        <tr class="text-center align-middle" wire:key="r-{{ $g->id_guia }}-{{ $r['id_recurso'] }}" style="color: white">
                                                             <td>{{ $idx + 1 }}</td>
                                                             <td class="text-center">{{ $r['recurso_nombre'] }}</td>
                                                             <td>
