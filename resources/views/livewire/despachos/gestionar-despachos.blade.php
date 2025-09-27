@@ -359,7 +359,7 @@
                                         <td>
                                             {{--{{ $row['guia'] }}--}}
 
-                                            <a href="{{route('generar_pdf',['id_guia'=>base64_encode($g->id_guia)])}}" target="_blank" class="text-decoration-none" >
+                                            <a href="{{route('generar_pdf',['id_guia'=>base64_encode($row['id_guia'])])}}" target="_blank" class="text-decoration-none" >
                                                 {{ $row['guia'] }}
                                             </a>
                                         </td>
@@ -368,7 +368,7 @@
                                             {{ $row['direccion'] }}
                                         </td>
                                         <td>
-                                            <a class="btn btn-sm bg-info text-white" wire:click="btn_info_guia('{{ base64_encode($g->id_guia) }}')" data-bs-toggle="modal" data-bs-target="#modal_info_guia">
+                                            <a class="btn btn-sm bg-info text-white" wire:click="btn_info_guia('{{ base64_encode($row['id_guia']) }}')" data-bs-toggle="modal" data-bs-target="#modal_info_guia">
                                                 <i class="fa-solid fa-circle-info"></i>
                                             </a>
 

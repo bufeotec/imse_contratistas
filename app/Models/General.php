@@ -477,7 +477,7 @@ class General extends Model
         }
     }
 
-    public function imprimir_ticket_os_pdf($id_despacho, $tipo)
+    public function imprimir_ticket_os_pdf_2($id_despacho, $tipo)
     {
         try {
             $despacho = Despacho::with('despacho_detalle')->findOrFail($id_despacho);
@@ -682,6 +682,210 @@ class General extends Model
             }
 
             // Salida
+            if ($tipo === 1) {
+                $pdf->Output();
+                exit;
+            } else {
+                $path = "comprobantes_despachos/despacho_{$despacho->id_despacho}.pdf";
+                $pdf->Output('F', public_path($path));
+                return $path;
+            }
+        } catch (\Exception $e) {
+            $this->logs->insertarLog($e);
+        }
+    }
+
+    public function imprimir_ticket_os_pdf($id_despacho, $tipo)
+    {
+        try {
+            $despacho = Despacho::with('despacho_detalle')->findOrFail($id_despacho);
+
+            $guia = DB::table('despachos_detalle')
+                ->join('guias', 'despachos_detalle.id_guia', '=', 'guias.id_guia')
+                ->join('clientes', 'guias.id_cliente', '=', 'clientes.id_cliente')
+                ->where('despachos_detalle.id_despacho', $despacho->id_despacho)
+                ->first();
+
+            if ($guia) {
+                $cliente_razon_social = $guia->cliente_razon_social ?? 'No disponible';
+                $cliente_email = $guia->cliente_email ?? 'No disponible';
+                $cliente_telefono = $guia->cliente_telefono ?? 'No disponible';
+                $cliente_direccion = $guia->cliente_direccion ?? 'No disponible';
+                $fecha_entrega = Carbon::parse($guia->guia_fecha_emision)->format('d/m/Y');
+            }
+
+            $pdf = new Fpdf();
+            $pdf->SetMargins(20, 15, 20);
+            $pdf->AddPage();
+
+            $marco = public_path('uploads/imse/marco_v1.png');
+            if (file_exists($marco)) {
+                $pdf->Image($marco, 0, 0, 210, 40);
+            }
+
+            // Logo
+            $logo = public_path('uploads/imse/logo_imse.png');
+            if (file_exists($logo)) {
+                $pdf->Image($logo, 140, null, 50, 25);
+            }
+            $pdf->Ln(5);
+
+            // Encabezado
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, 'IMSE CONTRATISTAS GENERALES E.I.R.L.', 0, 1, 'C');
+            $pdf->Cell(0, 8, 'ORDEN DE SERVICIO', 0, 1, 'C');
+            $pdf->Ln(10);
+
+            // ====== Marcos de info (dinámicos con wrap) ======
+            $y_top = $pdf->GetY();
+
+            // helper para escribir "Etiqueta : Valor (multilínea)" y devolver el nuevo Y
+            $writeLV = function($pdf, $x, $y, $label, $value, $labelW, $valueW, $lineH = 6) {
+                $pdf->SetXY($x, $y);
+                $pdf->SetFont('Arial', 'B', 10);
+                $pdf->Cell($labelW, $lineH, utf8_decode($label), 0, 0, 'L');
+
+                // valor multilínea
+                $pdf->SetFont('Arial', '', 10);
+                $pdf->SetXY($x + $labelW, $y);
+                $pdf->MultiCell($valueW, $lineH, utf8_decode($value ?? 'No disponible'), 0, 'L');
+
+                return $pdf->GetY(); // nuevo Y tras escribir el valor
+            };
+
+            // geometría de los cuadros
+            $x_left_box = 20;  $w_box = 85;  $x_right_box = 110;
+            $inner_pad = 5;   $lineH = 6;
+
+            // coordenadas internas
+            $x_left_in = $x_left_box + $inner_pad; // 25
+            $x_right_in = $x_right_box + $inner_pad; // 115
+
+            // anchos etiqueta/valor (izquierda)
+            $labelW_L = 22;
+            $valueW_L = ($x_left_box + $w_box - $inner_pad) - ($x_left_in + $labelW_L); // 100 - (25+22) = 53
+
+            // anchos etiqueta/valor (derecha)
+            $labelW_R = 35;
+            $valueW_R = ($x_right_box + $w_box - $inner_pad) - ($x_right_in + $labelW_R); // 190 - (115+35) = 40
+
+            // Y inicial dentro de cada cuadro
+            $y_left  = $y_top + $inner_pad;
+            $y_right = $y_top + $inner_pad;
+
+            // ----- Bloque IZQUIERDO: Cliente -----
+            $y_left = $writeLV($pdf, $x_left_in,  $y_left,  'Nombre:', $cliente_razon_social ?? 'No disponible', $labelW_L, $valueW_L, $lineH);
+            $y_left = $writeLV($pdf, $x_left_in,  $y_left,  'Email:', $cliente_email ?? 'No disponible', $labelW_L, $valueW_L, $lineH);
+            $y_left = $writeLV($pdf, $x_left_in,  $y_left,  'Teléfono:', $cliente_telefono ?? 'No disponible', $labelW_L, $valueW_L, $lineH);
+            $y_left = $writeLV($pdf, $x_left_in,  $y_left,  'Dirección:', $cliente_direccion ?? 'No disponible', $labelW_L, $valueW_L, $lineH);
+
+            // ----- Bloque DERECHO: Orden de servicio -----
+            $y_right = $writeLV($pdf, $x_right_in, $y_right, 'Número de Orden:', $despacho->despacho_nr_orden, $labelW_R, $valueW_R, $lineH);
+            $y_right = $writeLV($pdf, $x_right_in, $y_right, 'Fecha de Ingreso:', $fecha_entrega ?? '-', $labelW_R, $valueW_R, $lineH);
+            $y_right = $writeLV($pdf, $x_right_in, $y_right, 'Fecha de Entrega:', Carbon::parse($despacho->despacho_fecha)->format('d/m/Y'), $labelW_R, $valueW_R, $lineH);
+
+            // Altura necesaria según el lado que más creció
+            $y_bottom = max($y_left, $y_right);
+            $rect_h   = ($y_bottom - $y_top) + $inner_pad; // colchón inferior
+
+            // Dibujar marcos con altura exacta
+            $pdf->RoundedRect($x_left_box,  $y_top, $w_box, $rect_h, 2, 'D');
+            $pdf->RoundedRect($x_right_box, $y_top, $w_box, $rect_h, 2, 'D');
+
+            // Continuar debajo de ambos recuadros
+            $pdf->SetY($y_top + $rect_h + 10);
+
+            // =========================================
+            // Guías incluidas con recursos
+            // =========================================
+            $pdf->SetFont('Arial', 'BU', 10);
+            $pdf->Cell(0, 8, utf8_decode('Guías incluidas en este despacho'), 0, 1, 'L');
+            $pdf->Ln(2);
+
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->SetFillColor(240, 240, 240); // Color gris claro
+
+            $headerWidths = [25, 55, 25, 15, 25, 29];
+            $headerTexts = [
+                utf8_decode('Guía'),
+                utf8_decode('Descripción'),
+                'Precio',
+                'Cant.',
+                'Tipo',
+                'Recurso'
+            ];
+
+            foreach ($headerWidths as $i => $w) {
+                $pdf->Cell($w, 8, $headerTexts[$i], 1, 0, 'C', true);
+            }
+            $pdf->Ln(8);
+
+            // Configurar widths para las filas de datos (que seguirán usando Row)
+            $pdf->SetWidths([25, 55, 25, 15, 25, 29]);
+            $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C']);
+            $pdf->SetFont('Arial', '', 8);
+
+            foreach ($despacho->despacho_detalle as $detalle) {
+                $g = DB::table('guias')
+                    ->select('guia_serie', 'guia_correlativo', 'guia_trabajo_realizar')
+                    ->where('id_guia', $detalle->id_guia)
+                    ->first();
+
+                $codigo = $g ? ($g->guia_serie . '-' . $g->guia_correlativo) : '-';
+                $descripcion_servicio = $g->guia_trabajo_realizar ?? '';
+
+                // Acortar descripción si es muy larga
+                if (strlen($descripcion_servicio) > 60) {
+                    $descripcion_servicio = substr($descripcion_servicio, 0, 57) . '...';
+                }
+
+                // Obtener materiales
+                $materiales = DB::table('guias_recursos as gr')
+                    ->join('recursos as r', 'r.id_recurso', '=', 'gr.id_recurso')
+                    ->leftJoin('tipos_recursos as tr', 'tr.id_tipo_recurso', '=', 'r.id_tipo_recurso')
+                    ->select(
+                        'gr.guia_recurso_cantidad',
+                        'r.recurso_nombre',
+                        'tr.tipo_recurso_concepto'
+                    )
+                    ->where('gr.id_guia', $detalle->id_guia)
+                    ->get();
+
+                if ($materiales->count() === 0) {
+                    $pdf->Row([
+                        $codigo,
+                        utf8_decode($descripcion_servicio),
+                        'S/. 0.00',
+                        '-',
+                        '-',
+                        utf8_decode('Sin materiales')
+                    ]);
+                } else {
+                    foreach ($materiales as $i => $m) {
+                        // acortar nombres de recursos si son muy largos
+                        $recurso_nombre = $m->recurso_nombre ?? '-';
+                        if (strlen($recurso_nombre) > 25) {
+                            $recurso_nombre = substr($recurso_nombre, 0, 22) . '...';
+                        }
+
+                        $material_tipo = $m->tipo_recurso_concepto ?? '-';
+                        if (strlen($material_tipo) > 15) {
+                            $material_tipo = substr($material_tipo, 0, 12) . '...';
+                        }
+
+                        $pdf->Row([
+                            $i === 0 ? $codigo : '',
+                            $i === 0 ? utf8_decode($descripcion_servicio) : '',
+                            $i === 0 ? 'S/. 0.00' : '',
+                            (string)($m->guia_recurso_cantidad ?? 0),
+                            utf8_decode($material_tipo),
+                            utf8_decode($recurso_nombre)
+                        ]);
+                    }
+                }
+            }
+
+            // salida
             if ($tipo === 1) {
                 $pdf->Output();
                 exit;
